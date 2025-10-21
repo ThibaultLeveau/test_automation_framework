@@ -1,7 +1,7 @@
 {
     "name": "Main Test Plan",
-    "description": "This is the main test plan for the project demonstrating file system checks.",
-    "version": "1.0.0",
+    "description": "This is the main test plan for the project demonstrating file system checks and tmp capabilities.",
+    "version": "1.1.0",
     "author": "Test Automation Team",
     "created_date": "2025-01-21",
     "test_cases": [
@@ -28,6 +28,41 @@
                     "parameters": {
                         "file_path": "/etc/hosts",
                         "expected_permission": "644"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "name": "Temporary File Operations Test",
+            "description": "Test file creation and operations using temporary directory capabilities.",
+            "steps": [
+                {
+                    "step_number": 1,
+                    "test_script": "files/create_file.py",
+                    "test_function": "create_file",
+                    "parameters": {
+                        "file_path": "<tmp>/test_file_1.txt",
+                        "content": "This is a test file created in temporary directory",
+                        "ensure_parent_dirs": true
+                    }
+                },
+                {
+                    "step_number": 2,
+                    "test_script": "files/create_file.py",
+                    "test_function": "create_file",
+                    "parameters": {
+                        "file_path": "<tmp>/secure_file.txt",
+                        "content": "Secure file with specific permissions",
+                        "permissions": 600
+                    }
+                },
+                {
+                    "step_number": 3,
+                    "test_script": "files/check_files.py",
+                    "test_function": "check_file",
+                    "parameters": {
+                        "file_path": "<tmp>/test_file_1.txt"
                     }
                 }
             ]

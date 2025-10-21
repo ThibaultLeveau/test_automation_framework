@@ -24,6 +24,11 @@
 }
 ```
 
+### tmp area
+
+The `parameters` objects within each test step can include special `<tmp>` tags to indicate that a temporary directory should be created and used for that parameter. 
+The framework will automatically replace these tags with platform-specific temporary directory paths.
+
 ### Example
 
 "test_cases": [

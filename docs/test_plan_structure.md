@@ -84,6 +84,55 @@ Test script paths are resolved relative to the `scripts/` directory:
 
 Parameters are passed directly to the test function as keyword arguments. The function signature should match the parameter names defined in the test step.
 
+### Temporary Directory Support
+
+The framework supports automatic temporary directory management using `<tmp>` tags in parameter values:
+
+```json
+{
+  "step_number": 1,
+  "test_script": "files/create_file.py",
+  "test_function": "create_file",
+  "parameters": {
+    "file_path": "<tmp>/test_file.txt",
+    "content": "Test content"
+  }
+}
+```
+
+**How `<tmp>` tags work:**
+- `<tmp>` is automatically replaced with the platform-specific temporary directory path
+- On Windows: `C:/test_automation_framework/<execution_id>/`
+- On Linux: `/tmp/test_automation_framework/<execution_id>/`
+- The temporary directory is created at the start of test plan execution and cleaned up automatically
+- Each execution gets a unique subdirectory to prevent conflicts
+
+**Supported parameter types:**
+- String parameters: `<tmp>/path/to/file.txt`
+- Nested objects: `{"input_dir": "<tmp>/input", "output_dir": "<tmp>/output"}`
+- Arrays: `["<tmp>/file1.txt", "<tmp>/file2.txt"]`
+
+**Example with complex parameters:**
+```json
+{
+  "step_number": 1,
+  "test_script": "files/create_file.py",
+  "test_function": "create_multiple_files",
+  "parameters": {
+    "file_list": [
+      {
+        "path": "<tmp>/subdir/file1.txt",
+        "content": "First file"
+      },
+      {
+        "path": "<tmp>/subdir/file2.txt",
+        "content": "Second file"
+      }
+    ]
+  }
+}
+```
+
 ## Example Test Plan
 
 ```json

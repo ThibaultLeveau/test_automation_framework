@@ -10,6 +10,7 @@ import importlib.util
 import glob
 from datetime import datetime
 from libs.log_library import create_log_manager
+from libs.tmp_area_library import get_tmp_manager, create_tmp_area, cleanup_tmp_area, process_parameters
 
 
 class TestAutomationFramework:
@@ -92,9 +93,17 @@ class TestAutomationFramework:
             )
             
             if test_function:
-                # Execute the function with parameters
-                result = test_function(**step["parameters"])
+                # Process parameters to resolve <tmp> tags
+                processed_parameters = process_parameters(step["parameters"])
+                
+                # Execute the function with processed parameters
+                result = test_function(**processed_parameters)
                 step_result["result"] = result
+                
+                # Add parameter processing info to result for debugging
+                if self.debug_level >= 2:
+                    step_result["processed_parameters"] = processed_parameters
+                    step_result["original_parameters"] = step["parameters"]
                 
             else:
                 step_result["result"] = {
@@ -140,6 +149,11 @@ class TestAutomationFramework:
         if not plan:
             return
         
+        # Create temporary area for this test plan execution
+        tmp_result = create_tmp_area()
+        if tmp_result["returncode"] != 0:
+            print(f"Warning: Failed to create temporary area: {tmp_result.get('stderr', 'Unknown error')}")
+        
         # Use log manager to display test plan start
         self.log_manager.display_test_plan_start(plan)
         
@@ -147,6 +161,10 @@ class TestAutomationFramework:
             "plan_name": plan["name"],
             "plan_path": plan_path,
             "timestamp": datetime.now().isoformat(),
+            "tmp_area_info": {
+                "tmp_path": get_tmp_manager().get_tmp_path() if get_tmp_manager().tmp_framework_path else None,
+                "creation_result": tmp_result
+            },
             "test_cases": []
         }
         
@@ -160,6 +178,8 @@ class TestAutomationFramework:
             
             if not test_cases_to_execute:
                 print(f"Warning: Test case ID {self.test_case_id} not found in test plan")
+                # Clean up temporary area before returning
+                cleanup_tmp_area()
                 return plan_results
         
         for test_case in test_cases_to_execute:
@@ -173,6 +193,11 @@ class TestAutomationFramework:
         
         # Use log manager to display summary
         self.log_manager.display_test_plan_summary(plan["name"], total_steps, passed_steps)
+        
+        # Clean up temporary area after test plan execution
+        cleanup_result = cleanup_tmp_area()
+        if cleanup_result["returncode"] != 0:
+            print(f"Warning: Failed to clean up temporary area: {cleanup_result.get('stderr', 'Unknown error')}")
         
         self.results.append(plan_results)
         return plan_results

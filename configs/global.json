@@ -1,0 +1,7 @@
+{
+  "tmp": {
+    "linux_tmp_path": "/tmp/test_automation_framework",
+    "windows_tmp_path": "C:/test_automation_framework",
+    "description": "Temporary directory configuration for test automation framework"
+  }
+}
