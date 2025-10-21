@@ -9,21 +9,36 @@ The `main.py` script is the central execution engine for the test automation fra
 ### Basic Usage
 
 ```bash
-# Execute all test plans in the test_plans directory
-python main.py
-
-# Execute a specific test plan
+# Execute a specific test plan (required)
 python main.py test_plans/main.json
 
-# Execute a test plan with relative path
-python main.py my_test_plan.json
+# Execute with test case filtering
+python main.py test_plans/main.json -i 1
+
+# Execute with debug output for failed steps
+python main.py test_plans/main.json -d 1
+
+# Execute with full debug output and filtering
+python main.py test_plans/main.json -i 1 -d 2
+
+# Display help
+python main.py -h
 ```
 
 ### Command Line Options
 
-The script accepts one optional argument:
-- **No arguments**: Executes all test plans found in `test_plans/` directory
-- **Single argument**: Path to a specific test plan JSON file to execute
+| Option | Description | Default |
+|--------|-------------|---------|
+| `test_plan` | Path to test plan JSON file (required) | - |
+| `-i, --test-case-id ID` | Filter execution to specific test case ID | All test cases |
+| `-d, --debug-level LEVEL` | Debug output level (0=no debug, 1=debug on fail, 2=debug always) | 0 |
+| `-h, --help` | Show help message and exit | - |
+
+### Debug Levels
+
+- **Level 0 (default)**: No debug - only basic pass/fail status
+- **Level 1**: Debug on fail - show STDOUT, STDERR, EXCEPTION for failed steps only
+- **Level 2**: Debug always - show STDOUT, STDERR, EXCEPTION for all steps
 
 ## Execution Flow
 

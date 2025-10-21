@@ -9,20 +9,26 @@ import json
 import importlib.util
 import glob
 from datetime import datetime
+from libs.log_library import create_log_manager
 
 
 class TestAutomationFramework:
-    def __init__(self, test_plans_dir="test_plans", scripts_dir="scripts"):
+    def __init__(self, test_plans_dir="test_plans", scripts_dir="scripts", debug_level=0, test_case_id=None):
         """
         Initialize the test automation framework.
         
         Args:
             test_plans_dir (str): Directory containing test plan JSON files
             scripts_dir (str): Directory containing test script Python files
+            debug_level (int): Debug level (0=no debug, 1=debug on fail, 2=debug always)
+            test_case_id (int): Optional test case ID to filter execution
         """
         self.test_plans_dir = test_plans_dir
         self.scripts_dir = scripts_dir
+        self.debug_level = debug_level
+        self.test_case_id = test_case_id
         self.results = []
+        self.log_manager = create_log_manager(debug_level)
     
     def load_test_plan(self, plan_path):
         """Load and validate a test plan JSON file."""
@@ -90,10 +96,6 @@ class TestAutomationFramework:
                 result = test_function(**step["parameters"])
                 step_result["result"] = result
                 
-                # Print execution result
-                status = "PASSED" if result.get("returncode", 1) == 0 else "FAILED"
-                print(f"  Step {step['step_number']}: {status} - {result.get('stdout', result.get('stderr', 'No output'))}")
-                
             else:
                 step_result["result"] = {
                     "stdout": "",
@@ -101,7 +103,6 @@ class TestAutomationFramework:
                     "exception": "Function import failed",
                     "returncode": 3
                 }
-                print(f"  Step {step['step_number']}: FAILED - Function import failed")
                 
         except Exception as e:
             step_result["result"] = {
@@ -110,14 +111,20 @@ class TestAutomationFramework:
                 "exception": str(e),
                 "returncode": 4
             }
-            print(f"  Step {step['step_number']}: FAILED - Execution error: {e}")
+        
+        # Use log manager to display result
+        self.log_manager.display_step_result(
+            step["step_number"], 
+            step_result["result"],
+            test_case_name
+        )
         
         return step_result
     
     def execute_test_case(self, test_case, plan_name):
         """Execute all steps in a test case."""
-        print(f"\nExecuting Test Case: {test_case['name']}")
-        print(f"Description: {test_case.get('description', 'No description')}")
+        # Use log manager to display test case start
+        self.log_manager.display_test_case_start(test_case)
         
         case_results = []
         
@@ -133,11 +140,8 @@ class TestAutomationFramework:
         if not plan:
             return
         
-        print(f"\n{'='*60}")
-        print(f"Executing Test Plan: {plan['name']}")
-        print(f"Description: {plan.get('description', 'No description')}")
-        print(f"Timestamp: {datetime.now().isoformat()}")
-        print(f"{'='*60}")
+        # Use log manager to display test plan start
+        self.log_manager.display_test_plan_start(plan)
         
         plan_results = {
             "plan_name": plan["name"],
@@ -146,7 +150,19 @@ class TestAutomationFramework:
             "test_cases": []
         }
         
-        for test_case in plan["test_cases"]:
+        # Filter test cases if test_case_id is specified
+        test_cases_to_execute = plan["test_cases"]
+        if self.test_case_id is not None:
+            test_cases_to_execute = [
+                tc for tc in plan["test_cases"] 
+                if tc.get("id") == self.test_case_id
+            ]
+            
+            if not test_cases_to_execute:
+                print(f"Warning: Test case ID {self.test_case_id} not found in test plan")
+                return plan_results
+        
+        for test_case in test_cases_to_execute:
             case_results = self.execute_test_case(test_case, plan["name"])
             plan_results["test_cases"].extend(case_results)
         
@@ -155,13 +171,8 @@ class TestAutomationFramework:
         passed_steps = sum(1 for step in plan_results["test_cases"] 
                           if step["result"].get("returncode", 1) == 0)
         
-        print(f"\n{'='*60}")
-        print(f"Test Plan Summary: {plan['name']}")
-        print(f"Total Steps: {total_steps}")
-        print(f"Passed: {passed_steps}")
-        print(f"Failed: {total_steps - passed_steps}")
-        print(f"Success Rate: {(passed_steps/total_steps)*100:.1f}%" if total_steps > 0 else "N/A")
-        print(f"{'='*60}")
+        # Use log manager to display summary
+        self.log_manager.display_test_plan_summary(plan["name"], total_steps, passed_steps)
         
         self.results.append(plan_results)
         return plan_results
@@ -189,34 +200,13 @@ class TestAutomationFramework:
     
     def generate_final_report(self):
         """Generate a final execution report."""
-        print(f"\n{'#'*80}")
-        print("# FINAL EXECUTION REPORT")
-        print(f"{'#'*80}")
-        
-        total_plans = len(self.results)
-        total_steps = sum(len(plan["test_cases"]) for plan in self.results)
-        total_passed = sum(
-            sum(1 for step in plan["test_cases"] if step["result"].get("returncode", 1) == 0)
-            for plan in self.results
-        )
-        
-        print(f"Total Test Plans Executed: {total_plans}")
-        print(f"Total Test Steps Executed: {total_steps}")
-        print(f"Total Steps Passed: {total_passed}")
-        print(f"Total Steps Failed: {total_steps - total_passed}")
-        
-        if total_steps > 0:
-            success_rate = (total_passed / total_steps) * 100
-            print(f"Overall Success Rate: {success_rate:.1f}%")
-        
-        print(f"{'#'*80}")
+        # Use log manager to display final report
+        self.log_manager.display_final_report(self.results)
         
         # Save detailed results to file
         report_file = f"test_execution_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         with open(report_file, 'w') as f:
             json.dump(self.results, f, indent=2)
-        
-        print(f"Detailed report saved to: {report_file}")
 
 
 def validate_test_plan_structure(test_plan):

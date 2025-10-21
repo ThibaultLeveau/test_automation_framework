@@ -15,8 +15,7 @@
                     "test_script": "files/check_files.py",
                     "test_function": "check_file",
                     "parameters": {
-                        "file_path": "C:\\Windows\\System32\\drivers\\etc\\hosts",
-                        "expected_permission": null
+                        "file_path": "C:\\Windows\\System32\\drivers\\etc\\hosts"
                     }
                 },
                 {
@@ -24,8 +23,7 @@
                     "test_script": "files/check_files.py",
                     "test_function": "check_file",
                     "parameters": {
-                        "file_path": "main.py",
-                        "expected_permission": null
+                        "file_path": "main.py"
                     }
                 }
             ]

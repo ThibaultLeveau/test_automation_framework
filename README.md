@@ -11,22 +11,41 @@ A comprehensive, modular test automation framework designed for technical valida
 - **Comprehensive Reporting**: Detailed execution reports with timestamps
 - **Extensible Design**: Easy to add new test types and categories
 - **Standardized Output**: Consistent return format across all tests
+- **Test Case Filtering**: Execute specific test cases using `-i` option
+- **Debug Levels**: Flexible debugging with `-d` option (0=no debug, 1=debug on fail, 2=debug always)
+- **Help System**: Comprehensive help with `-h` option
 
 ## Quick Start
 
-### 1. Execute All Test Plans
+### 1. Execute Specific Test Plan (Required)
 
 ```bash
-python main.py
+python main.py test_plans/main.json
 ```
 
-### 2. Execute Specific Test Plan
+### 2. Execute with Test Case Filtering
 
 ```bash
-python main.py test_plans/windows_test.json
+python main.py test_plans/main.json -i 1
 ```
 
-### 3. Test Individual Script
+### 3. Execute with Debug Output
+
+```bash
+# Debug on failures only
+python main.py test_plans/main.json -d 1
+
+# Full debug output
+python main.py test_plans/main.json -d 2
+```
+
+### 4. Display Help
+
+```bash
+python main.py -h
+```
+
+### 5. Test Individual Script
 
 ```bash
 python scripts/files/check_files.py main.py
