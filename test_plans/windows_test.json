@@ -62,6 +62,22 @@
                     }
                 }
             ]
+        },
+        {
+            "id": 3,
+            "name": "Command Execution Test",
+            "description": "Test local command execution with search string validation",
+            "steps": [
+                {
+                    "step_number": 1,
+                    "test_script": "process/execute_command.py",
+                    "test_function": "execute_command",
+                    "parameters": {
+                        "command": "echo hello world",
+                        "search_string": "hello world"
+                    }
+                }
+            ]
         }
     ]
 }
