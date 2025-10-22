@@ -59,11 +59,42 @@
         "exception": "str - Exception message if any",
         "returncode": "int - 0 for success, non-zero for failure"
       }
+    },
+    {
+      "script_path": "http/http_request.py",
+      "function_name": "make_http_request",
+      "function_args": {
+        "url": "str (required) - Target URL for the HTTP request",
+        "method": "str (optional) - HTTP method (GET, POST, PUT, DELETE, etc.) (default: GET)",
+        "auth_type": "str (optional) - Authentication type - 'none', 'basic', 'bearer', 'custom' (default: 'none')",
+        "username": "str (optional) - Username for basic authentication",
+        "password": "str (optional) - Password for basic authentication",
+        "bearer_token": "str (optional) - Bearer token for bearer authentication",
+        "custom_auth_header": "dict (optional) - Custom authentication headers",
+        "headers": "dict (optional) - Additional request headers",
+        "body": "dict/str (optional) - Request body for POST/PUT requests",
+        "proxy_server": "str (optional) - Proxy server URL",
+        "proxy_auth": "dict (optional) - Proxy authentication credentials",
+        "ca_cert": "str (optional) - Path to CA certificate file",
+        "verify_ssl": "bool (optional) - Enable SSL certificate verification (default: True)",
+        "timeout": "int (optional) - Request timeout in seconds (default: 30)",
+        "expected_status": "int/list (optional) - Expected HTTP status code(s) (default: 200)"
+      },
+      "description": "Comprehensive HTTP request function supporting multiple authentication types, custom headers, request body, proxy configuration, and SSL certificate verification. Returns detailed response information including status code, headers, and body content.",
+      "category": "http",
+      "platform_support": ["windows", "linux"],
+      "return_structure": {
+        "stdout": "str - Standard output with response details",
+        "stderr": "str - Error output if any",
+        "exception": "str - Exception message if any",
+        "returncode": "int - 0 for success, non-zero for failure"
+      }
     }
   ],
   "categories": {
     "files": "File system operations and validations",
-    "process": "Process execution and command operations"
+    "process": "Process execution and command operations",
+    "http": "HTTP/HTTPS service validations and API testing"
   },
   "usage_notes": [
     "All functions return a standardized dictionary structure for consistent error handling",

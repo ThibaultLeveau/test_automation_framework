@@ -106,6 +106,26 @@
         },
         {
             "id": 3,
+            "name": "HTTP Basic Authentication Test",
+            "description": "Test HTTP basic authentication with httpbin.org service",
+            "steps": [
+                {
+                    "step_number": 1,
+                    "test_script": "http/http_request.py",
+                    "test_function": "make_http_request",
+                    "parameters": {
+                        "url": "https://httpbin.org/basic-auth/user/password",
+                        "method": "GET",
+                        "auth_type": "basic",
+                        "username": "user",
+                        "password": "password",
+                        "expected_status": 200
+                    }
+                }
+            ]
+        },
+        {
+            "id": 4,
             "name": "Windows basic command execution Test",
             "description": "Test local command execution on Windows platform",
             "steps": [
