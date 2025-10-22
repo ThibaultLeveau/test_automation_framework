@@ -11,3 +11,6 @@ test-automation-framework/
 ├── test_plans/                 # Plans de test
 └── tests/                      # Catalogue de tests disponibles
 ```
+
+in /script, you will find a script_catalog.json containing all the available functions to automate test.
+before developing a new one, verify it exists already or not

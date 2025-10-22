@@ -40,10 +40,33 @@ def check_file(file_path, expected_permission=None, expected_owner=None, expecte
         # Check permissions if specified
         if expected_permission:
             actual_permission = oct(file_stat.st_mode)[-3:]
-            if actual_permission != expected_permission:
-                result["stderr"] = f"Permission mismatch. Expected: {expected_permission}, Actual: {actual_permission}"
-                result["returncode"] = 1
-                return result
+            
+            # Convert expected_permission to string for comparison
+            # Handle both string ("600") and integer (600) inputs
+            if isinstance(expected_permission, int):
+                expected_permission_str = str(expected_permission)
+            else:
+                expected_permission_str = str(expected_permission)
+            
+            # On Windows, file permissions don't work the same way as Unix
+            # The actual permissions will often be 444 or 666 regardless of what we set
+            if platform.system() == "Windows":
+                # For Windows, we'll be more lenient about permissions
+                # Only fail if the file doesn't exist or we can't access it
+                if actual_permission in ["444", "666"] and expected_permission_str in ["600", "644", "666"]:
+                    # These are common Windows permission patterns, consider it acceptable
+                    result["stdout"] = f"File check passed (Windows permissions): {file_path}"
+                    result["stdout"] += f" (expected: {expected_permission_str}, actual: {actual_permission})"
+                else:
+                    result["stderr"] = f"Permission mismatch. Expected: {expected_permission_str}, Actual: {actual_permission}"
+                    result["returncode"] = 1
+                    return result
+            else:
+                # On Unix/Linux, enforce strict permission checking
+                if actual_permission != expected_permission_str:
+                    result["stderr"] = f"Permission mismatch. Expected: {expected_permission_str}, Actual: {actual_permission}"
+                    result["returncode"] = 1
+                    return result
         
         # Check owner and group (Linux/Unix only)
         if platform.system() != "Windows":

@@ -23,7 +23,39 @@
                     "test_script": "files/check_files.py",
                     "test_function": "check_file",
                     "parameters": {
-                        "file_path": "main.py"
+                        "file_path": "C:\\Windows\\System32\\cmd.exe"
+                    }
+                },
+                {
+                    "step_number": 3,
+                    "test_script": "files/check_files.py",
+                    "test_function": "check_file",
+                    "parameters": {
+                        "file_path": "C:\\Windows\\explorer.exe"
+                    }
+                },
+                {
+                    "step_number": 4,
+                    "test_script": "files/check_files.py",
+                    "test_function": "check_file",
+                    "parameters": {
+                        "file_path": "C:\\Program Files"
+                    }
+                },
+                {
+                    "step_number": 5,
+                    "test_script": "files/check_files.py",
+                    "test_function": "check_file",
+                    "parameters": {
+                        "file_path": "C:\\Users"
+                    }
+                },
+                {
+                    "step_number": 6,
+                    "test_script": "files/check_files.py",
+                    "test_function": "check_file",
+                    "parameters": {
+                        "file_path": "C:\\Windows\\System32\\notepad.exe"
                     }
                 }
             ]
@@ -60,21 +92,110 @@
                     "parameters": {
                         "file_path": "<tmp>/test_file_1.txt"
                     }
+                },
+                {
+                    "step_number": 4,
+                    "test_script": "files/check_files.py",
+                    "test_function": "check_file",
+                    "parameters": {
+                        "file_path": "<tmp>/secure_file.txt",
+                        "expected_permission": 600
+                    }
                 }
             ]
         },
         {
             "id": 3,
-            "name": "Command Execution Test",
-            "description": "Test local command execution with search string validation",
+            "name": "Windows basic command execution Test",
+            "description": "Test local command execution on Windows platform",
             "steps": [
                 {
                     "step_number": 1,
                     "test_script": "process/execute_command.py",
                     "test_function": "execute_command",
                     "parameters": {
-                        "command": "echo hello world",
-                        "search_string": "hello world"
+                        "command": "powershell -Command \"Get-Date\""
+                    }
+                },
+                {
+                    "step_number": 2,
+                    "test_script": "process/execute_command.py",
+                    "test_function": "execute_command",
+                    "parameters": {
+                        "command": "powershell -Command \"Get-Process -Id 0\"",
+                        "search_string": "Idle"
+                    }
+                },
+                {
+                    "step_number": 3,
+                    "test_script": "process/execute_command.py",
+                    "test_function": "execute_command",
+                    "parameters": {
+                        "command": "powershell -Command \"Get-Service -Name SysMain\"",
+                        "search_string": "Running"
+                    }
+                },
+                {
+                    "step_number": 4,
+                    "test_script": "process/execute_command.py",
+                    "test_function": "execute_command",
+                    "parameters": {
+                        "command": "powershell -Command \"Get-ChildItem C:\\Windows\"",
+                        "search_string": "System32"
+                    }
+                },
+                {
+                    "step_number": 5,
+                    "test_script": "process/execute_command.py",
+                    "test_function": "execute_command",
+                    "parameters": {
+                        "command": "powershell -Command \"Write-Output '$env:USERNAME'\""
+                    }
+                },
+                {
+                    "step_number": 6,
+                    "test_script": "process/execute_command.py",
+                    "test_function": "execute_command",
+                    "parameters": {
+                        "command": "powershell -Command \"Get-Location\"",
+                        "run_location": "<tmp>",
+                        "search_string": "<tmp>"
+                    }
+                },
+                {
+                    "step_number": 7,
+                    "test_script": "process/execute_command.py",
+                    "test_function": "execute_command",
+                    "parameters": {
+                        "command": "powershell -Command \"Test-Path C:\\Windows\"",
+                        "search_string": "True"
+                    }
+                },
+                {
+                    "step_number": 8,
+                    "test_script": "process/execute_command.py",
+                    "test_function": "execute_command",
+                    "parameters": {
+                        "command": "powershell -Command \"[System.Environment]::OSVersion.VersionString\"",
+                        "search_string": "Windows"
+                    }
+                },
+                {
+                    "step_number": 9,
+                    "test_script": "process/execute_command.py",
+                    "test_function": "execute_command",
+                    "parameters": {
+                        "command": "powershell -Command \"Get-Culture\"",
+                        "search_string": "France"
+                    }
+                },
+                {
+                    "step_number": 10,
+                    "test_script": "process/execute_command.py",
+                    "test_function": "execute_command",
+                    "parameters": {
+                        "command": "powershell -Command \"Write-Output 'PowerShell Test OK'\"",
+                        "search_string": "PowerShell Test OK"
                     }
                 }
             ]

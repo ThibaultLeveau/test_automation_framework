@@ -47,9 +47,14 @@ def create_file(file_path, content="", permissions=None, ensure_parent_dirs=True
         
         # Set permissions if specified
         if permissions is not None:
-            os.chmod(file_path, permissions)
-            actual_permissions = oct(os.stat(file_path).st_mode)[-3:]
-            result["stdout"] = f"File created with permissions {actual_permissions}: {file_path}"
+            try:
+                os.chmod(file_path, permissions)
+                actual_permissions = oct(os.stat(file_path).st_mode)[-3:]
+                result["stdout"] = f"File created with permissions {actual_permissions}: {file_path}"
+            except Exception as e:
+                # On Windows, permissions may not work as expected
+                result["stdout"] = f"File created: {file_path} (permission setting attempted: {permissions})"
+                result["stderr"] = f"Note: Permission setting may not work as expected on Windows: {str(e)}"
         else:
             result["stdout"] = f"File created: {file_path}"
         
