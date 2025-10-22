@@ -67,9 +67,9 @@
         "url": "str (required) - Target URL for the HTTP request",
         "method": "str (optional) - HTTP method (GET, POST, PUT, DELETE, etc.) (default: GET)",
         "auth_type": "str (optional) - Authentication type - 'none', 'basic', 'bearer', 'custom' (default: 'none')",
-        "username": "str (optional) - Username for basic authentication",
-        "password": "str (optional) - Password for basic authentication",
-        "bearer_token": "str (optional) - Bearer token for bearer authentication",
+        "username": "str (optional) - Username for basic authentication (legacy parameter)",
+        "password": "str (optional) - Password for basic authentication (legacy parameter)",
+        "bearer_token": "str (optional) - Bearer token for bearer authentication (legacy parameter)",
         "custom_auth_header": "dict (optional) - Custom authentication headers",
         "headers": "dict (optional) - Additional request headers",
         "body": "dict/str (optional) - Request body for POST/PUT requests",
@@ -78,9 +78,12 @@
         "ca_cert": "str (optional) - Path to CA certificate file",
         "verify_ssl": "bool (optional) - Enable SSL certificate verification (default: True)",
         "timeout": "int (optional) - Request timeout in seconds (default: 30)",
-        "expected_status": "int/list (optional) - Expected HTTP status code(s) (default: 200)"
+        "expected_status": "int/list (optional) - Expected HTTP status code(s) (default: 200)",
+        "auth_username": "str (optional) - Username for basic authentication (standardized parameter)",
+        "auth_password": "str (optional) - Password for basic authentication (standardized parameter)",
+        "auth_token": "str (optional) - Token for bearer authentication (standardized parameter)"
       },
-      "description": "Comprehensive HTTP request function supporting multiple authentication types, custom headers, request body, proxy configuration, and SSL certificate verification. Returns detailed response information including status code, headers, and body content.",
+      "description": "Comprehensive HTTP request function supporting multiple authentication types, custom headers, request body, proxy configuration, and SSL certificate verification. Supports both legacy authentication parameters and new standardized authentication parameters (auth_username, auth_password, auth_token) for secure credential management.",
       "category": "http",
       "platform_support": ["windows", "linux"],
       "return_structure": {

@@ -11,6 +11,7 @@ import glob
 from datetime import datetime
 from libs.log_library import create_log_manager
 from libs.tmp_area_library import get_tmp_manager, create_tmp_area, cleanup_tmp_area, process_parameters
+from libs.credential_library import resolve_authentication
 
 
 class TestAutomationFramework:
@@ -81,6 +82,7 @@ class TestAutomationFramework:
             "test_script": step.get("test_script", "unknown"),
             "test_function": step.get("test_function", "unknown"),
             "parameters": step.get("parameters", {}),
+            "authentication": step.get("authentication", {}),
             "timestamp": datetime.now().isoformat(),
             "result": {}
         }
@@ -96,6 +98,16 @@ class TestAutomationFramework:
                 # Process parameters to resolve <tmp> tags
                 processed_parameters = process_parameters(step["parameters"])
                 
+                # Resolve authentication if specified
+                auth_config = step.get("authentication", {})
+                if auth_config:
+                    auth_credentials = resolve_authentication(auth_config)
+                    if auth_credentials:
+                        # Merge authentication credentials with parameters
+                        processed_parameters.update(auth_credentials)
+                        if self.debug_level >= 1:
+                            print(f"Authentication resolved for step {step['step_number']}: {list(auth_credentials.keys())}")
+                
                 # Execute the function with processed parameters
                 result = test_function(**processed_parameters)
                 step_result["result"] = result
@@ -104,6 +116,8 @@ class TestAutomationFramework:
                 if self.debug_level >= 2:
                     step_result["processed_parameters"] = processed_parameters
                     step_result["original_parameters"] = step["parameters"]
+                    if auth_config:
+                        step_result["authentication_resolved"] = list(auth_credentials.keys())
                 
             else:
                 step_result["result"] = {

@@ -14,7 +14,8 @@ from requests.auth import HTTPBasicAuth
 def make_http_request(url, method="GET", auth_type="none", username=None, password=None, 
                      bearer_token=None, custom_auth_header=None, headers=None, body=None,
                      proxy_server=None, proxy_auth=None, ca_cert=None, verify_ssl=True,
-                     timeout=30, expected_status=200):
+                     timeout=30, expected_status=200,
+                     auth_username=None, auth_password=None, auth_token=None):
     """
     Execute an HTTP request with comprehensive configuration options.
     
@@ -64,6 +65,18 @@ def make_http_request(url, method="GET", auth_type="none", username=None, passwo
         
         # Normalize method to uppercase
         method = method.upper()
+        
+        # Handle standardized authentication parameters (priority over legacy parameters)
+        if auth_username and auth_password:
+            username = auth_username
+            password = auth_password
+            if auth_type == "none":
+                auth_type = "basic"
+        
+        if auth_token:
+            bearer_token = auth_token
+            if auth_type == "none":
+                auth_type = "bearer"
         
         # Validate authentication parameters based on auth_type
         if auth_type == "basic" and (not username or not password):

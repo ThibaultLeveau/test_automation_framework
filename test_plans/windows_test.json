@@ -107,18 +107,19 @@
         {
             "id": 3,
             "name": "HTTP Basic Authentication Test",
-            "description": "Test HTTP basic authentication with httpbin.org service",
+            "description": "Test HTTP basic authentication with httpbin.org service using secure credential storage",
             "steps": [
                 {
                     "step_number": 1,
                     "test_script": "http/http_request.py",
                     "test_function": "make_http_request",
+                    "authentication": {
+                        "authentication_type": "basic",
+                        "authentication_name": "httpbin_basic_auth"
+                    },
                     "parameters": {
                         "url": "https://httpbin.org/basic-auth/user/password",
                         "method": "GET",
-                        "auth_type": "basic",
-                        "username": "user",
-                        "password": "password",
                         "expected_status": 200
                     }
                 }
