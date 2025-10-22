@@ -1,0 +1,74 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2025-01-22",
+  "description": "Comprehensive catalog of all available test automation script functions for the test automation framework",
+  "scripts": [
+    {
+      "script_path": "files/check_files.py",
+      "function_name": "check_file",
+      "function_args": {
+        "file_path": "str (required) - Path to the file to validate",
+        "expected_permission": "str (optional) - Expected file permissions in octal format (e.g., '644')",
+        "expected_owner": "str (optional) - Expected file owner (Linux/Unix only)",
+        "expected_group": "str (optional) - Expected file group (Linux/Unix only)"
+      },
+      "description": "Comprehensive file validation function that checks file existence, permissions, ownership, and group membership. Supports both Windows and Linux systems with platform-specific validation for ownership and group checks. Returns standardized result structure with success/failure indicators.",
+      "category": "files",
+      "platform_support": ["windows", "linux"],
+      "return_structure": {
+        "stdout": "str - Standard output message",
+        "stderr": "str - Error output message", 
+        "exception": "str - Exception message if any",
+        "returncode": "int - 0 for success, non-zero for failure"
+      }
+    },
+    {
+      "script_path": "files/create_file.py",
+      "function_name": "create_file",
+      "function_args": {
+        "file_path": "str (required) - Path where the file should be created",
+        "content": "str (optional) - Content to write to the file",
+        "permissions": "int (optional) - File permissions as octal integer (e.g., 0o644)",
+        "ensure_parent_dirs": "bool (optional) - Create parent directories if they don't exist (default: true)"
+      },
+      "description": "File creation utility that creates files at specified paths with optional content and permissions. Supports automatic parent directory creation and temporary directory usage with <tmp> tags. Useful for test setup and temporary file operations.",
+      "category": "files",
+      "platform_support": ["windows", "linux"],
+      "return_structure": {
+        "stdout": "str - Standard output message",
+        "stderr": "str - Error output message",
+        "exception": "str - Exception message if any",
+        "returncode": "int - 0 for success, non-zero for failure"
+      }
+    },
+    {
+      "script_path": "process/execute_command.py",
+      "function_name": "execute_command",
+      "function_args": {
+        "command": "str (required) - Command to execute",
+        "run_location": "str (optional) - Working directory for command execution",
+        "timeout": "int (optional) - Command timeout in seconds (default: 30)",
+        "search_string": "str (optional) - String to search for in stdout/stderr for validation"
+      },
+      "description": "Cross-platform command execution function that runs commands on Windows (PowerShell) or Linux (bash) systems. Supports working directory specification, timeout control, and output validation through search string matching. Automatically detects platform and uses appropriate shell.",
+      "category": "process",
+      "platform_support": ["windows", "linux"],
+      "return_structure": {
+        "stdout": "str - Standard output from the command",
+        "stderr": "str - Error output from the command",
+        "exception": "str - Exception message if any",
+        "returncode": "int - 0 for success, non-zero for failure"
+      }
+    }
+  ],
+  "categories": {
+    "files": "File system operations and validations",
+    "process": "Process execution and command operations"
+  },
+  "usage_notes": [
+    "All functions return a standardized dictionary structure for consistent error handling",
+    "Use <tmp> tags in file_path parameters for temporary directory operations",
+    "Platform-specific parameters (like owner/group) are automatically handled based on OS",
+    "Return codes: 0=success, 1=test failed, 2=execution error, 3=import error, 4=parameter error"
+  ]
+}
