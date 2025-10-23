@@ -8,8 +8,9 @@ import os
 import json
 import importlib.util
 import glob
+import sys
 from datetime import datetime
-from libs.log_library import create_log_manager
+from libs.log_library import create_log_manager, create_json_execution_logger
 from libs.tmp_area_library import get_tmp_manager, create_tmp_area, cleanup_tmp_area, process_parameters
 from libs.credential_library import resolve_authentication
 
@@ -163,6 +164,11 @@ class TestAutomationFramework:
         if not plan:
             return
         
+        # Initialize JSON execution logger
+        json_logger = create_json_execution_logger()
+        command_line = " ".join(sys.argv)
+        json_logger.start_execution(plan["name"], plan_path, command_line)
+        
         # Create temporary area for this test plan execution
         tmp_result = create_tmp_area()
         if tmp_result["returncode"] != 0:
@@ -199,6 +205,10 @@ class TestAutomationFramework:
         for test_case in test_cases_to_execute:
             case_results = self.execute_test_case(test_case, plan["name"])
             plan_results["test_cases"].extend(case_results)
+            
+            # Add step results to JSON logger
+            for step_result in case_results:
+                json_logger.add_step_result(step_result)
         
         # Generate summary
         total_steps = len(plan_results["test_cases"])
@@ -207,6 +217,11 @@ class TestAutomationFramework:
         
         # Use log manager to display summary
         self.log_manager.display_test_plan_summary(plan["name"], total_steps, passed_steps)
+        
+        # Save JSON execution log
+        log_file_path = json_logger.finish_execution()
+        if log_file_path:
+            print(f"Execution log saved to: {log_file_path}")
         
         # Clean up temporary area after test plan execution
         cleanup_result = cleanup_tmp_area()

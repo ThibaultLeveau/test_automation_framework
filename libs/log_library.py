@@ -4,6 +4,13 @@ Log Library
 Handles debug level management and result display for the test automation framework.
 """
 
+import json
+import uuid
+import time
+import getpass
+import os
+from datetime import datetime
+
 
 class LogManager:
     def __init__(self, debug_level=0):
@@ -174,3 +181,151 @@ def create_log_manager(debug_level=0):
         LogManager: Configured log manager instance
     """
     return LogManager(debug_level)
+
+
+class JSONExecutionLogger:
+    """
+    Handles JSON logging for test executions
+    
+    Creates individual JSON log files for each test plan execution
+    in the test_execution_log/ directory.
+    """
+    
+    def __init__(self):
+        """Initialize the JSON execution logger."""
+        self.log_dir = "test_execution_log"
+        self.execution_start_time = None
+        self.current_execution_data = None
+        
+    def start_execution(self, plan_name, plan_file, command_line):
+        """
+        Start tracking a new test execution.
+        
+        Args:
+            plan_name (str): Name of the test plan
+            plan_file (str): Path to the test plan file
+            command_line (str): Command line used to execute
+        """
+        self.execution_start_time = time.perf_counter()
+        self.current_execution_data = {
+            "execution_id": str(uuid.uuid4()),
+            "timestamp": datetime.now().isoformat(),
+            "current_user": getpass.getuser(),
+            "test_plan": plan_file,
+            "test_plan_name": plan_name,
+            "command_line": command_line,
+            "execution_time_seconds": 0.0,
+            "results": {
+                "total_steps": 0,
+                "passed_steps": 0,
+                "failed_steps": 0,
+                "success_rate": 0.0
+            },
+            "detailed_results": []
+        }
+    
+    def add_step_result(self, step_result):
+        """
+        Add a step result to the current execution.
+        
+        Args:
+            step_result (dict): Step execution result
+        """
+        if self.current_execution_data:
+            # Update summary statistics
+            self.current_execution_data["results"]["total_steps"] += 1
+            if step_result["result"].get("returncode", 1) == 0:
+                self.current_execution_data["results"]["passed_steps"] += 1
+            else:
+                self.current_execution_data["results"]["failed_steps"] += 1
+            
+            # Calculate success rate
+            total_steps = self.current_execution_data["results"]["total_steps"]
+            passed_steps = self.current_execution_data["results"]["passed_steps"]
+            if total_steps > 0:
+                self.current_execution_data["results"]["success_rate"] = (passed_steps / total_steps) * 100
+            
+            # Add detailed result with stdout, stderr, and exception
+            detailed_result = {
+                "test_case": step_result.get("test_case", "unknown"),
+                "step_number": step_result.get("step_number", "unknown"),
+                "status": "PASSED" if step_result["result"].get("returncode", 1) == 0 else "FAILED",
+                "returncode": step_result["result"].get("returncode", 1),
+                "timestamp": step_result.get("timestamp", datetime.now().isoformat()),
+                "stdout": step_result["result"].get("stdout", ""),
+                "stderr": step_result["result"].get("stderr", ""),
+                "exception": step_result["result"].get("exception", "")
+            }
+            self.current_execution_data["detailed_results"].append(detailed_result)
+    
+    def finish_execution(self):
+        """
+        Finish the current execution and save to JSON file.
+        
+        Returns:
+            str: Path to the saved log file
+        """
+        if not self.current_execution_data:
+            return None
+        
+        # Calculate execution time
+        if self.execution_start_time:
+            execution_time = time.perf_counter() - self.execution_start_time
+            self.current_execution_data["execution_time_seconds"] = round(execution_time, 2)
+        
+        # Ensure log directory exists
+        if not os.path.exists(self.log_dir):
+            os.makedirs(self.log_dir)
+        
+        # Generate filename
+        plan_name_clean = self._clean_filename(self.current_execution_data["test_plan_name"])
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H_%M")
+        filename = f"log_{plan_name_clean}_{timestamp}.json"
+        filepath = os.path.join(self.log_dir, filename)
+        
+        # Save to file
+        try:
+            with open(filepath, 'w', encoding='utf-8') as f:
+                json.dump(self.current_execution_data, f, indent=2, ensure_ascii=False)
+            return filepath
+        except Exception as e:
+            print(f"Error saving execution log: {e}")
+            return None
+    
+    def _clean_filename(self, filename):
+        """
+        Clean a string to be safe for use as a filename.
+        
+        Args:
+            filename (str): Original filename
+            
+        Returns:
+            str: Cleaned filename
+        """
+        # Replace problematic characters with underscores
+        invalid_chars = '<>:"/\\|?*'
+        for char in invalid_chars:
+            filename = filename.replace(char, '_')
+        
+        # Remove multiple consecutive underscores
+        while '__' in filename:
+            filename = filename.replace('__', '_')
+        
+        # Remove leading/trailing underscores and spaces
+        filename = filename.strip(' _')
+        
+        # Limit length to avoid filesystem issues
+        if len(filename) > 100:
+            filename = filename[:100]
+        
+        return filename
+
+
+def create_json_execution_logger():
+    """
+    Factory function to create a JSONExecutionLogger instance.
+    
+    Returns:
+        JSONExecutionLogger: Configured JSON execution logger instance
+    """
+    return JSONExecutionLogger()

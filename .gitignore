@@ -1,1 +1,5 @@
-libs/__pycache__/test_library.cpython-313.pyc
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+test_execution_log/
