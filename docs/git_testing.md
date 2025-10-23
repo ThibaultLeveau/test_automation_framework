@@ -6,6 +6,31 @@ The Git testing module provides comprehensive Git repository operations for test
 
 ## Available Functions
 
+### git_validate_connectivity
+Validates connectivity to a Git repository using ls-remote command. This is the Git equivalent of 'svn info' or 'svn ls' for connectivity testing. Provides lightweight validation of repository accessibility and authentication without cloning.
+
+**Parameters:**
+- `repo_url` (str, required): URL of the Git repository to validate
+- `clear_git_configs` (bool, optional): Clear Git configuration environment variables (default: false)
+- `auth_username` (str, optional): Username for HTTP authentication
+- `auth_token` (str, optional): Token for HTTP authentication
+
+**Example:**
+```json
+{
+  "test_script": "git/git_operations.py",
+  "test_function": "git_validate_connectivity",
+  "authentication": {
+    "authentication_type": "basic",
+    "authentication_name": "github_test_private_repo"
+  },
+  "parameters": {
+    "repo_url": "https://github.com/ThibaultLeveau/test_private_repo.git",
+    "clear_git_configs": true
+  }
+}
+```
+
 ### git_clone
 Clones a Git repository to the specified directory with support for authentication and Git configuration management.
 

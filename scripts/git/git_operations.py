@@ -192,6 +192,88 @@ def git_push_file(repo_dir: str, file_path: str, commit_message: str,
     return result
 
 
+def git_validate_connectivity(repo_url: str, clear_git_configs: bool = False,
+                            auth_username: str = None, auth_password: str = None, 
+                            auth_type: str = "none") -> Dict:
+    """
+    Validate connectivity to a Git repository using ls-remote command.
+    This is the Git equivalent of 'svn info' or 'svn ls' for connectivity testing.
+    
+    Args:
+        repo_url (str): URL of the Git repository to validate
+        clear_git_configs (bool, optional): Clear Git configuration environment variables
+        auth_username (str, optional): Username for HTTP authentication
+        auth_password (str, optional): Password for HTTP authentication
+        auth_type (str): Authentication type - "none", "basic", "bearer", "custom" (default: "none")
+        
+    Returns:
+        dict: Standardized result structure containing:
+            - stdout (str): Standard output from the operation
+            - stderr (str): Error output if any
+            - exception (str): Exception message if any
+            - returncode (int): 0 for success, non-zero for failure
+    """
+    
+    result = {
+        "stdout": "",
+        "stderr": "",
+        "exception": "",
+        "returncode": 0
+    }
+    
+    try:
+        # Import execute_command function
+        from scripts.process.execute_command import execute_command
+        
+        # Store original environment variables
+        original_git_config_global = os.environ.get('GIT_CONFIG_GLOBAL')
+        original_git_config_system = os.environ.get('GIT_CONFIG_SYSTEM')
+        
+        # Clear Git configs if requested
+        if clear_git_configs:
+            if 'GIT_CONFIG_GLOBAL' in os.environ:
+                del os.environ['GIT_CONFIG_GLOBAL']
+            if 'GIT_CONFIG_SYSTEM' in os.environ:
+                del os.environ['GIT_CONFIG_SYSTEM']
+        
+        # Prepare authentication URL if credentials provided
+        if auth_type == "basic" and auth_username and auth_password:
+            # Convert HTTPS URL to authenticated format
+            if repo_url.startswith('https://'):
+                # Remove protocol and extract path
+                repo_path = repo_url.replace('https://', '')
+                authenticated_url = f"https://{auth_username}:{auth_password}@{repo_path}"
+            else:
+                authenticated_url = repo_url
+        else:
+            authenticated_url = repo_url
+        
+        # Execute git ls-remote command to validate connectivity
+        ls_remote_command = f'git ls-remote "{authenticated_url}"'
+        ls_remote_result = execute_command(ls_remote_command, timeout=60)
+        
+        result["stdout"] = ls_remote_result["stdout"]
+        result["stderr"] = ls_remote_result["stderr"]
+        result["exception"] = ls_remote_result["exception"]
+        result["returncode"] = ls_remote_result["returncode"]
+        
+        # Restore original environment variables
+        if clear_git_configs:
+            if original_git_config_global:
+                os.environ['GIT_CONFIG_GLOBAL'] = original_git_config_global
+            if original_git_config_system:
+                os.environ['GIT_CONFIG_SYSTEM'] = original_git_config_system
+        
+        if ls_remote_result["returncode"] != 0:
+            result["returncode"] = 1  # Test failed
+            
+    except Exception as e:
+        result["exception"] = str(e)
+        result["returncode"] = 2  # Execution error
+    
+    return result
+
+
 def git_delete_file(repo_dir: str, file_path: str, commit_message: str,
                    clear_git_configs: bool = False, auth_username: str = None,
                    auth_password: str = None, auth_type: str = "none") -> Dict:

@@ -136,6 +136,25 @@
     },
     {
       "script_path": "git/git_operations.py",
+      "function_name": "git_validate_connectivity",
+      "function_args": {
+        "repo_url": "str (required) - URL of the Git repository to validate",
+        "clear_git_configs": "bool (optional) - Clear Git configuration environment variables (default: false)",
+        "auth_username": "str (optional) - Username for HTTP authentication",
+        "auth_token": "str (optional) - Token for HTTP authentication"
+      },
+      "description": "Validate connectivity to a Git repository using ls-remote command. This is the Git equivalent of 'svn info' or 'svn ls' for connectivity testing. Provides lightweight validation of repository accessibility and authentication without cloning.",
+      "category": "git",
+      "platform_support": ["windows", "linux"],
+      "return_structure": {
+        "stdout": "str - Standard output from the operation",
+        "stderr": "str - Error output if any",
+        "exception": "str - Exception message if any",
+        "returncode": "int - 0 for success, non-zero for failure"
+      }
+    },
+    {
+      "script_path": "git/git_operations.py",
       "function_name": "git_delete_file",
       "function_args": {
         "repo_dir": "str (required) - Path to the Git repository",

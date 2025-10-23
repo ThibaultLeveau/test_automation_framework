@@ -224,10 +224,23 @@
         {
             "id": 5,
             "name": "Git Repository Operations Test",
-            "description": "Test Git repository operations including clone, push, and delete operations with authentication",
+            "description": "Test Git repository operations including connectivity validation, clone, push, and delete operations with authentication",
             "steps": [
                 {
                     "step_number": 1,
+                    "test_script": "git/git_operations.py",
+                    "test_function": "git_validate_connectivity",
+                    "authentication": {
+                        "authentication_type": "basic",
+                        "authentication_name": "github_test_private_repo"
+                    },
+                    "parameters": {
+                        "repo_url": "https://github.com/ThibaultLeveau/test_private_repo.git",
+                        "clear_git_configs": true
+                    }
+                },
+                {
+                    "step_number": 2,
                     "test_script": "git/git_operations.py",
                     "test_function": "git_clone",
                     "authentication": {
@@ -241,7 +254,7 @@
                     }
                 },
                 {
-                    "step_number": 2,
+                    "step_number": 3,
                     "test_script": "files/create_file.py",
                     "test_function": "create_file",
                     "parameters": {
@@ -251,7 +264,7 @@
                     }
                 },
                 {
-                    "step_number": 3,
+                    "step_number": 4,
                     "test_script": "git/git_operations.py",
                     "test_function": "git_push_file",
                     "authentication": {
@@ -266,7 +279,7 @@
                     }
                 },
                 {
-                    "step_number": 4,
+                    "step_number": 5,
                     "test_script": "git/git_operations.py",
                     "test_function": "git_delete_file",
                     "authentication": {
