@@ -1,0 +1,24 @@
+{
+  "name": "Debug Test Plan",
+  "description": "Test plan to verify debug output shows all three elements",
+  "test_cases": [
+    {
+      "id": 1,
+      "name": "Debug Output Test",
+      "description": "Test that stdout, stderr, and exception are always shown in debug mode",
+      "steps": [
+        {
+          "step_number": 1,
+          "test_script": "files/check_files.py",
+          "test_function": "check_file",
+          "parameters": {
+            "file_path": "/nonexistent/file",
+            "expected_permission": "644",
+            "expected_owner": "root",
+            "expected_group": "root"
+          }
+        }
+      ]
+    }
+  ]
+}

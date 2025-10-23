@@ -63,20 +63,17 @@ class LogManager:
         """
         indent = "    "
         
-        # Show STDOUT if present
+        # Always show STDOUT, even if empty
         stdout = step_result.get("stdout", "").strip()
-        if stdout:
-            print(f"{indent}STDOUT: {stdout}")
+        print(f"{indent}STDOUT: {stdout if stdout else '(empty)'}")
         
-        # Show STDERR if present
+        # Always show STDERR, even if empty
         stderr = step_result.get("stderr", "").strip()
-        if stderr:
-            print(f"{indent}STDERR: {stderr}")
+        print(f"{indent}STDERR: {stderr if stderr else '(empty)'}")
         
-        # Show EXCEPTION if present
+        # Always show EXCEPTION, even if empty
         exception = step_result.get("exception", "").strip()
-        if exception:
-            print(f"{indent}EXCEPTION: {exception}")
+        print(f"{indent}EXCEPTION: {exception if exception else '(empty)'}")
         
         # Show return code
         returncode = step_result.get("returncode", 1)
