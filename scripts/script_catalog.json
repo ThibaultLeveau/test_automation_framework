@@ -92,12 +92,75 @@
         "exception": "str - Exception message if any",
         "returncode": "int - 0 for success, non-zero for failure"
       }
+    },
+    {
+      "script_path": "git/git_operations.py",
+      "function_name": "git_clone",
+      "function_args": {
+        "repo_url": "str (required) - URL of the Git repository to clone",
+        "target_dir": "str (required) - Target directory where repository will be cloned",
+        "clear_git_configs": "bool (optional) - Clear Git configuration environment variables (default: false)",
+        "auth_username": "str (optional) - Username for HTTP authentication",
+        "auth_token": "str (optional) - Token for HTTP authentication"
+      },
+      "description": "Clone a Git repository to the specified directory with support for authentication and Git configuration management. Supports clearing Git configuration environment variables for isolated testing.",
+      "category": "git",
+      "platform_support": ["windows", "linux"],
+      "return_structure": {
+        "stdout": "str - Standard output from the operation",
+        "stderr": "str - Error output if any",
+        "exception": "str - Exception message if any",
+        "returncode": "int - 0 for success, non-zero for failure"
+      }
+    },
+    {
+      "script_path": "git/git_operations.py",
+      "function_name": "git_push_file",
+      "function_args": {
+        "repo_dir": "str (required) - Path to the Git repository",
+        "file_path": "str (required) - Path to the file to add and push",
+        "commit_message": "str (required) - Commit message for the operation",
+        "clear_git_configs": "bool (optional) - Clear Git configuration environment variables (default: false)",
+        "auth_username": "str (optional) - Username for HTTP authentication",
+        "auth_token": "str (optional) - Token for HTTP authentication"
+      },
+      "description": "Add, commit, and push a file to a Git repository with support for authentication and Git configuration management. Validates repository and file existence before operations.",
+      "category": "git",
+      "platform_support": ["windows", "linux"],
+      "return_structure": {
+        "stdout": "str - Standard output from the operation",
+        "stderr": "str - Error output if any",
+        "exception": "str - Exception message if any",
+        "returncode": "int - 0 for success, non-zero for failure"
+      }
+    },
+    {
+      "script_path": "git/git_operations.py",
+      "function_name": "git_delete_file",
+      "function_args": {
+        "repo_dir": "str (required) - Path to the Git repository",
+        "file_path": "str (required) - Path to the file to remove",
+        "commit_message": "str (required) - Commit message for the operation",
+        "clear_git_configs": "bool (optional) - Clear Git configuration environment variables (default: false)",
+        "auth_username": "str (optional) - Username for HTTP authentication",
+        "auth_token": "str (optional) - Token for HTTP authentication"
+      },
+      "description": "Remove a file from a Git repository and push the deletion with support for authentication and Git configuration management. Validates repository existence before operations.",
+      "category": "git",
+      "platform_support": ["windows", "linux"],
+      "return_structure": {
+        "stdout": "str - Standard output from the operation",
+        "stderr": "str - Error output if any",
+        "exception": "str - Exception message if any",
+        "returncode": "int - 0 for success, non-zero for failure"
+      }
     }
   ],
   "categories": {
     "files": "File system operations and validations",
     "process": "Process execution and command operations",
-    "http": "HTTP/HTTPS service validations and API testing"
+    "http": "HTTP/HTTPS service validations and API testing",
+    "git": "Git repository operations and validations"
   },
   "usage_notes": [
     "All functions return a standardized dictionary structure for consistent error handling",

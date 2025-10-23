@@ -220,6 +220,67 @@
                     }
                 }
             ]
+        },
+        {
+            "id": 5,
+            "name": "Git Repository Operations Test",
+            "description": "Test Git repository operations including clone, push, and delete operations with authentication",
+            "steps": [
+                {
+                    "step_number": 1,
+                    "test_script": "git/git_operations.py",
+                    "test_function": "git_clone",
+                    "authentication": {
+                        "authentication_type": "basic",
+                        "authentication_name": "github_test_private_repo"
+                    },
+                    "parameters": {
+                        "repo_url": "https://github.com/ThibaultLeveau/test_private_repo.git",
+                        "target_dir": "<tmp>/test_private_repo",
+                        "clear_git_configs": true
+                    }
+                },
+                {
+                    "step_number": 2,
+                    "test_script": "files/create_file.py",
+                    "test_function": "create_file",
+                    "parameters": {
+                        "file_path": "<tmp>/test_private_repo/test_file_for_git.txt",
+                        "content": "This is a test file created for Git operations testing",
+                        "ensure_parent_dirs": true
+                    }
+                },
+                {
+                    "step_number": 3,
+                    "test_script": "git/git_operations.py",
+                    "test_function": "git_push_file",
+                    "authentication": {
+                        "authentication_type": "basic",
+                        "authentication_name": "github_test_private_repo"
+                    },
+                    "parameters": {
+                        "repo_dir": "<tmp>/test_private_repo",
+                        "file_path": "test_file_for_git.txt",
+                        "commit_message": "Add test file for automation testing",
+                        "clear_git_configs": true
+                    }
+                },
+                {
+                    "step_number": 4,
+                    "test_script": "git/git_operations.py",
+                    "test_function": "git_delete_file",
+                    "authentication": {
+                        "authentication_type": "basic",
+                        "authentication_name": "github_test_private_repo"
+                    },
+                    "parameters": {
+                        "repo_dir": "<tmp>/test_private_repo",
+                        "file_path": "test_file_for_git.txt",
+                        "commit_message": "Remove test file after automation testing",
+                        "clear_git_configs": true
+                    }
+                }
+            ]
         }
     ]
 }
