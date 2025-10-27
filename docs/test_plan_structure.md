@@ -28,6 +28,7 @@ Test plans are JSON files that define the structure and execution flow of automa
   "id": "number or string (required)",
   "name": "string (required)",
   "description": "string (required)",
+  "negative_test": "boolean (optional, default: false)",
   "steps": [
     // Array of test step objects (required)
   ]
@@ -71,6 +72,61 @@ Test plans are JSON files that define the structure and execution flow of automa
 - **version**: Version of the test plan (e.g., "1.0.0")
 - **author**: Creator or maintainer of the test plan
 - **created_date**: Creation date in ISO format (YYYY-MM-DD)
+- **negative_test**: Boolean flag to indicate negative test behavior (default: false)
+
+## Negative Test Support
+
+The framework supports negative tests through the `negative_test` field in test cases. When set to `true`, the PASS/FAIL logic is inverted for all steps within that test case.
+
+### How Negative Tests Work
+
+**Normal Test (negative_test: false or omitted):**
+- Returncode 0 = PASSED
+- Returncode ≠ 0 = FAILED
+
+**Negative Test (negative_test: true):**
+- Returncode ≠ 0 = PASSED (test expected to fail)
+- Returncode 0 = FAILED (test unexpectedly succeeded)
+
+### Example Negative Test Case
+
+```json
+{
+  "id": 3,
+  "name": "Negative File Validation",
+  "description": "Verify that non-existent files are properly detected",
+  "negative_test": true,
+  "steps": [
+    {
+      "step_number": 1,
+      "test_script": "files/check_files.py",
+      "test_function": "check_file",
+      "parameters": {
+        "file_path": "/non/existent/file.txt"
+      }
+    }
+  ]
+}
+```
+
+**Expected Behavior:**
+- The `check_file` function will fail (returncode ≠ 0) because the file doesn't exist
+- Since this is a negative test, the failure is expected and the step will be marked as PASSED
+- The output will show: `Step 1: PASSED [NEGATIVE]`
+
+### Use Cases for Negative Tests
+
+1. **Error Condition Validation**: Verify that functions properly handle invalid inputs
+2. **Boundary Testing**: Test edge cases and invalid scenarios
+3. **Security Testing**: Validate that unauthorized access is properly rejected
+4. **Resource Validation**: Ensure proper handling of missing resources
+5. **Input Validation**: Test that invalid inputs are properly rejected
+
+### Debug Information
+
+When debug level is enabled (debug_level ≥ 1), negative tests show additional information:
+- `[NEGATIVE]` indicator in the step status
+- Original returncode vs inverted returncode in debug output
 
 ## Script Path Resolution
 

@@ -75,7 +75,7 @@ class TestAutomationFramework:
             print(f"Error importing function {function_name} from {script_path}: {e}")
             return None
     
-    def execute_test_step(self, step, test_case_name):
+    def execute_test_step(self, step, test_case_name, is_negative_test=False):
         """Execute a single test step."""
         step_result = {
             "test_case": test_case_name,
@@ -85,6 +85,7 @@ class TestAutomationFramework:
             "parameters": step.get("parameters", {}),
             "authentication": step.get("authentication", {}),
             "timestamp": datetime.now().isoformat(),
+            "is_negative_test": is_negative_test,
             "result": {}
         }
         
@@ -111,6 +112,14 @@ class TestAutomationFramework:
                 
                 # Execute the function with processed parameters
                 result = test_function(**processed_parameters)
+                
+                # Invert returncode for negative tests
+                if is_negative_test:
+                    original_returncode = result.get("returncode", 1)
+                    result["returncode"] = 0 if original_returncode != 0 else 1
+                    result["original_returncode"] = original_returncode
+                    result["is_negative_test"] = True
+                
                 step_result["result"] = result
                 
                 # Add parameter processing info to result for debugging
@@ -140,7 +149,8 @@ class TestAutomationFramework:
         self.log_manager.display_step_result(
             step["step_number"], 
             step_result["result"],
-            test_case_name
+            test_case_name,
+            is_negative_test
         )
         
         return step_result
@@ -152,8 +162,11 @@ class TestAutomationFramework:
         
         case_results = []
         
+        # Check if this is a negative test
+        is_negative_test = test_case.get("negative_test", False)
+        
         for step in test_case.get("steps", []):
-            step_result = self.execute_test_step(step, test_case["name"])
+            step_result = self.execute_test_step(step, test_case["name"], is_negative_test)
             case_results.append(step_result)
         
         return case_results

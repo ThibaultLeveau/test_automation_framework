@@ -42,7 +42,7 @@ class LogManager:
             return True
         return False
     
-    def display_step_result(self, step_number, step_result, test_case_name=""):
+    def display_step_result(self, step_number, step_result, test_case_name="", is_negative_test=False):
         """
         Display step execution result based on debug level.
         
@@ -50,23 +50,33 @@ class LogManager:
             step_number (str/int): Step number identifier
             step_result (dict): Step execution result
             test_case_name (str): Optional test case name for context
+            is_negative_test (bool): Whether this is a negative test (inverted logic)
         """
-        status = "PASSED" if step_result.get("returncode", 1) == 0 else "FAILED"
+        # Determine status based on negative test logic
+        if is_negative_test:
+            # For negative tests: PASS when returncode != 0, FAIL when returncode == 0
+            status = "PASSED" if step_result.get("returncode", 0) != 0 else "FAILED"
+            status_indicator = " [NEGATIVE]"
+        else:
+            # For normal tests: PASS when returncode == 0, FAIL when returncode != 0
+            status = "PASSED" if step_result.get("returncode", 1) == 0 else "FAILED"
+            status_indicator = ""
         
         # Basic status display (always shown)
         context = f" ({test_case_name})" if test_case_name else ""
-        print(f"  Step {step_number}{context}: {status}")
+        print(f"  Step {step_number}{context}: {status}{status_indicator}")
         
         # Debug output based on debug level
         if self.should_show_debug(step_result):
-            self._display_debug_output(step_result)
+            self._display_debug_output(step_result, is_negative_test)
     
-    def _display_debug_output(self, step_result):
+    def _display_debug_output(self, step_result, is_negative_test=False):
         """
         Display detailed debug output for a step.
         
         Args:
             step_result (dict): Step execution result
+            is_negative_test (bool): Whether this is a negative test
         """
         indent = "    "
         
@@ -82,9 +92,13 @@ class LogManager:
         exception = step_result.get("exception", "").strip()
         print(f"{indent}EXCEPTION: {exception if exception else '(empty)'}")
         
-        # Show return code
+        # Show return code with additional info for negative tests
         returncode = step_result.get("returncode", 1)
-        print(f"{indent}RETURNCODE: {returncode}")
+        if is_negative_test and "original_returncode" in step_result:
+            original_returncode = step_result.get("original_returncode", 1)
+            print(f"{indent}RETURNCODE: {returncode} (inverted from {original_returncode} for negative test)")
+        else:
+            print(f"{indent}RETURNCODE: {returncode}")
     
     def display_test_case_start(self, test_case):
         """
