@@ -23,7 +23,7 @@ class TmpAreaManager:
         self._load_config()
     
     def _load_config(self):
-        """Load configuration from global.json."""
+        """Load configuration from global.json and variables.json."""
         try:
             config_path = os.path.join(os.path.dirname(__file__), '..', 'configs', 'global.json')
             with open(config_path, 'r') as f:
@@ -36,7 +36,23 @@ class TmpAreaManager:
             # Fallback configuration
             self.linux_tmp_path = "/tmp/test_automation_framework"
             self.windows_tmp_path = "C:/test_automation_framework"
-            print(f"Warning: Could not load config, using fallback: {e}")
+            print(f"Warning: Could not load global config, using fallback: {e}")
+        
+        # Load variables from variables.json
+        self._load_variables()
+    
+    def _load_variables(self):
+        """Load variables from variables.json configuration file."""
+        self.variables = {}
+        try:
+            variables_path = os.path.join(os.path.dirname(__file__), '..', 'configs', 'variables.json')
+            if os.path.exists(variables_path):
+                with open(variables_path, 'r') as f:
+                    self.variables = json.load(f)
+            else:
+                print(f"Warning: Variables file not found at {variables_path}")
+        except Exception as e:
+            print(f"Warning: Could not load variables from variables.json: {e}")
     
     def get_platform_tmp_path(self):
         """
@@ -156,6 +172,52 @@ class TmpAreaManager:
         except:
             pass  # Ignore any errors in the permission fixing process
     
+    def resolve_variable(self, value):
+        """
+        Replace <var:variable_name> tags with values from variables.json.
+        
+        Args:
+            value (str): String containing <var:variable_name> tags
+            
+        Returns:
+            str: String with resolved variable values
+        """
+        if not isinstance(value, str):
+            return value
+        
+        import re
+        # Pattern to match <var:variable_name>
+        pattern = r'<var:([^>]+)>'
+        
+        def replace_var(match):
+            var_name = match.group(1)
+            return self.variables.get(var_name, "")
+        
+        return re.sub(pattern, replace_var, value)
+    
+    def resolve_environment_variable(self, value):
+        """
+        Replace <env:variable_name> tags with values from environment variables.
+        
+        Args:
+            value (str): String containing <env:variable_name> tags
+            
+        Returns:
+            str: String with resolved environment variable values
+        """
+        if not isinstance(value, str):
+            return value
+        
+        import re
+        # Pattern to match <env:variable_name>
+        pattern = r'<env:([^>]+)>'
+        
+        def replace_env(match):
+            var_name = match.group(1)
+            return os.environ.get(var_name, "")
+        
+        return re.sub(pattern, replace_env, value)
+    
     def resolve_tmp_path(self, path_with_tag):
         """
         Replace <tmp> tags in paths with the actual temporary directory path.
@@ -180,15 +242,36 @@ class TmpAreaManager:
         
         return path_with_tag
     
+    def resolve_all_tags(self, value):
+        """
+        Resolve all supported tags in a string value.
+        
+        Args:
+            value (str): String containing tags to resolve
+            
+        Returns:
+            str: String with all tags resolved
+        """
+        if not isinstance(value, str):
+            return value
+        
+        # Apply all tag resolutions in sequence
+        resolved_value = value
+        resolved_value = self.resolve_variable(resolved_value)
+        resolved_value = self.resolve_environment_variable(resolved_value)
+        resolved_value = self.resolve_tmp_path(resolved_value)
+        
+        return resolved_value
+    
     def process_parameters(self, parameters):
         """
-        Process parameters dictionary and resolve all <tmp> tags.
+        Process parameters dictionary and resolve all supported tags.
         
         Args:
             parameters (dict): Dictionary of parameters to process
             
         Returns:
-            dict: Parameters with resolved tmp paths
+            dict: Parameters with resolved tags (<tmp>, <var:variable_name>, <env:variable_name>)
         """
         if not isinstance(parameters, dict):
             return parameters
@@ -197,12 +280,12 @@ class TmpAreaManager:
         
         for key, value in parameters.items():
             if isinstance(value, str):
-                processed_params[key] = self.resolve_tmp_path(value)
+                processed_params[key] = self.resolve_all_tags(value)
             elif isinstance(value, dict):
                 processed_params[key] = self.process_parameters(value)
             elif isinstance(value, list):
                 processed_params[key] = [self.process_parameters(item) if isinstance(item, dict) 
-                                       else self.resolve_tmp_path(item) if isinstance(item, str) 
+                                       else self.resolve_all_tags(item) if isinstance(item, str) 
                                        else item for item in value]
             else:
                 processed_params[key] = value

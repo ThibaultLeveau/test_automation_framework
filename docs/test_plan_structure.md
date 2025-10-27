@@ -84,10 +84,11 @@ Test script paths are resolved relative to the `scripts/` directory:
 
 Parameters are passed directly to the test function as keyword arguments. The function signature should match the parameter names defined in the test step.
 
-### Temporary Directory Support
+### Parameter Tag Support
 
-The framework supports automatic temporary directory management using `<tmp>` tags in parameter values:
+The framework supports dynamic parameter resolution using special tags that are automatically processed during test execution:
 
+#### `<tmp>` - Temporary Directory
 ```json
 {
   "step_number": 1,
@@ -106,6 +107,66 @@ The framework supports automatic temporary directory management using `<tmp>` ta
 - On Linux: `/tmp/test_automation_framework/<execution_id>/`
 - The temporary directory is created at the start of test plan execution and cleaned up automatically
 - Each execution gets a unique subdirectory to prevent conflicts
+
+#### `<var:variable_name>` - Configuration Variables
+```json
+{
+  "step_number": 1,
+  "test_script": "files/create_file.py",
+  "test_function": "create_file",
+  "parameters": {
+    "file_path": "<var:test_data_dir>/input.txt",
+    "timeout": "<var:timeout>"
+  }
+}
+```
+
+**How `<var:variable_name>` tags work:**
+- Variables are loaded from `configs/variables.json`
+- If variable doesn't exist, replaced with empty string
+- Example variables.json structure:
+```json
+{
+  "project_name": "Test Automation Framework",
+  "default_user": "testuser",
+  "log_level": "INFO",
+  "timeout": "30",
+  "base_url": "http://localhost:8080",
+  "test_data_dir": "/opt/test_data"
+}
+```
+
+#### `<env:variable_name>` - Environment Variables
+```json
+{
+  "step_number": 1,
+  "test_script": "files/create_file.py",
+  "test_function": "create_file",
+  "parameters": {
+    "user_home": "<env:HOME>",
+    "temp_dir": "<env:TEMP>"
+  }
+}
+```
+
+**How `<env:variable_name>` tags work:**
+- Values are retrieved from system environment variables
+- If environment variable doesn't exist, replaced with empty string
+- Works with standard environment variables like `HOME`, `USERNAME`, `TEMP`, etc.
+
+#### Combined Tag Usage
+Tags can be combined in the same parameter value:
+```json
+{
+  "step_number": 1,
+  "test_script": "files/create_file.py",
+  "test_function": "create_file",
+  "parameters": {
+    "file_path": "<tmp>/<var:project_name>/<env:USERNAME>/data.txt",
+    "log_file": "<var:report_dir>/<env:COMPUTERNAME>.log"
+  }
+}
+```
 
 **Supported parameter types:**
 - String parameters: `<tmp>/path/to/file.txt`
