@@ -11,12 +11,12 @@
             "description": "Validate Windows system files and directories",
             "steps": [
                 {
-                    "step_number": 1,
                     "test_script": "files/check_files.py",
                     "test_function": "check_file",
                     "parameters": {
                         "file_path": "C:\\Windows\\System32\\drivers\\etc\\hosts"
-                    }
+                    },
+                    "step_number": 1
                 }
             ]
         },

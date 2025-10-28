@@ -90,19 +90,10 @@
 
         <div class="form-section">
           <h2>Test Cases</h2>
-          <div class="form-group">
-            <label for="testCases">Test Cases (JSON Format) *</label>
-            <textarea
-              id="testCases"
-              v-model="testCasesJson"
-              placeholder='[{"id": 1, "name": "Test Case 1", "steps": []}]'
-              rows="15"
-              :class="{ 'error': errors.test_cases }"
-              @input="validateJson"
-            ></textarea>
-            <span v-if="errors.test_cases" class="error-message">{{ errors.test_cases }}</span>
-            <div v-if="jsonValid" class="success-message">✓ Valid JSON</div>
-          </div>
+          <TestCasesTable
+            :test-cases="testPlan.test_cases"
+            @update:test-cases="updateTestCases"
+          />
         </div>
       </div>
     </div>
@@ -113,9 +104,13 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import apiService from '../services/api.js'
+import TestCasesTable from '../components/TestCasesTable.vue'
 
 export default {
   name: 'TestPlanDetail',
+  components: {
+    TestCasesTable
+  },
   setup() {
     const router = useRouter()
     const route = useRoute()
@@ -132,12 +127,14 @@ export default {
       test_cases: []
     })
     
-    const testCasesJson = ref('[]')
     const loading = ref(false)
     const saving = ref(false)
     const error = ref(null)
-    const jsonValid = ref(true)
     const errors = ref({})
+
+    const updateTestCases = (testCases) => {
+      testPlan.value.test_cases = testCases
+    }
 
     const loadTestPlan = async () => {
       if (isNew.value) return
@@ -147,23 +144,11 @@ export default {
       try {
         const data = await apiService.getTestPlan(testPlanId)
         testPlan.value = data
-        testCasesJson.value = JSON.stringify(data.test_cases, null, 2)
       } catch (err) {
         error.value = err.message
         console.error('Failed to load test plan:', err)
       } finally {
         loading.value = false
-      }
-    }
-
-    const validateJson = () => {
-      try {
-        JSON.parse(testCasesJson.value)
-        jsonValid.value = true
-        errors.value.test_cases = null
-      } catch (err) {
-        jsonValid.value = false
-        errors.value.test_cases = 'Invalid JSON format'
       }
     }
 
@@ -178,10 +163,6 @@ export default {
         errors.value.description = 'Description is required'
       }
       
-      if (!jsonValid.value) {
-        errors.value.test_cases = 'Test cases must be valid JSON'
-      }
-      
       return Object.keys(errors.value).length === 0
     }
 
@@ -193,8 +174,7 @@ export default {
       saving.value = true
       try {
         const testPlanData = {
-          ...testPlan.value,
-          test_cases: JSON.parse(testCasesJson.value)
+          ...testPlan.value
         }
 
         if (isNew.value) {
@@ -234,15 +214,13 @@ export default {
 
     return {
       testPlan,
-      testCasesJson,
       loading,
       saving,
       error,
-      jsonValid,
       errors,
       isNew,
+      updateTestCases,
       loadTestPlan,
-      validateJson,
       saveTestPlan,
       deleteTestPlan,
       goBack
