@@ -2,7 +2,7 @@
     "name": "Windows Test Plan",
     "description": "Test plan for Windows file system validation",
     "version": "1.0.0",
-    "author": "Test Automation Team",
+    "author": "Thibault L.",
     "created_date": "2025-01-21",
     "test_cases": [
         {

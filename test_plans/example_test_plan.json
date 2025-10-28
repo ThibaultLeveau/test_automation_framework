@@ -2,6 +2,8 @@
     "name": "Example Test Plan",
     "description": "Test plan for example test cases including file checks, HTTP requests, command execution, and Git operations.",
     "version": "1.0.0",
+    "author": "Thibault L.",
+    "created_date": "2025-10-28",
     "test_cases": [
         {
             "id": 1,
