@@ -3,3 +3,4 @@ __pycache__/
 *.pyo
 *.pyd
 test_execution_log/
+/web/frontend/node_modules/*
