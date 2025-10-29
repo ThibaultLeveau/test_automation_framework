@@ -4,7 +4,7 @@ Test Automation Framework - Web Interface Backend
 FastAPI backend for managing test plans, test catalog, execution logs, and variables.
 """
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, validator
 from typing import List, Optional, Dict, Any
@@ -13,6 +13,9 @@ import os
 import sys
 import re
 from datetime import datetime
+
+# Import test execution module
+from test_execution import execution_manager
 
 # Add parent directory to path to import existing framework modules
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -682,6 +685,35 @@ async def execute_test_plan(request: TestExecutionRequest):
         "debug_level": request.debug_level,
         "status": "pending"
     }
+
+@app.websocket("/ws/test-execution")
+async def websocket_test_execution(websocket: WebSocket):
+    """WebSocket endpoint for real-time test execution"""
+    await websocket.accept()
+    
+    try:
+        # Wait for execution request
+        data = await websocket.receive_json()
+        test_plan_id = data.get("test_plan_id")
+        debug_level = data.get("debug_level", 0)
+        
+        if not test_plan_id:
+            await websocket.send_json({
+                "type": "ERROR",
+                "message": "test_plan_id is required"
+            })
+            return
+        
+        # Execute the test plan
+        await execution_manager.execute_test_plan(test_plan_id, websocket, debug_level)
+        
+    except WebSocketDisconnect:
+        print("WebSocket disconnected")
+    except Exception as e:
+        await websocket.send_json({
+            "type": "ERROR",
+            "message": f"WebSocket error: {str(e)}"
+        })
 
 if __name__ == "__main__":
     import uvicorn

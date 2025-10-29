@@ -316,6 +316,9 @@ class JSONExecutionLogger:
         Returns:
             str: Cleaned filename
         """
+        # Replace spaces with underscores
+        filename = filename.replace(' ', '_')
+        
         # Replace problematic characters with underscores
         invalid_chars = '<>:"/\\|?*'
         for char in invalid_chars:

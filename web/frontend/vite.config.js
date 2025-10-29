@@ -15,6 +15,20 @@ export default defineConfig({
         target: 'http://localhost:8000',
         changeOrigin: true
       }
+    },
+    // Add this to handle Vue Router history mode in development
+    fs: {
+      allow: ['..']
     }
+  },
+  // Add this to handle Vue Router history mode in production
+  build: {
+    rollupOptions: {
+      external: []
+    }
+  },
+  // Add this to handle SPA fallback for Vue Router history mode
+  preview: {
+    port: 3000
   }
 })

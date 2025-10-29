@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import Home from './views/Home.vue'
@@ -9,10 +9,11 @@ import TestCatalog from './views/TestCatalog.vue'
 import Variables from './views/Variables.vue'
 import ExecutionLogs from './views/ExecutionLogs.vue'
 import ExecutionLogDetail from './views/ExecutionLogDetail.vue'
+import TestExecution from './views/TestExecution.vue'
 
 // Create router
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(),
   routes: [
     {
       path: '/',
@@ -48,6 +49,11 @@ const router = createRouter({
       path: '/execution-logs/:filename',
       name: 'ExecutionLogDetail',
       component: ExecutionLogDetail
+    },
+    {
+      path: '/test-execution',
+      name: 'TestExecution',
+      component: TestExecution
     }
   ]
 })
