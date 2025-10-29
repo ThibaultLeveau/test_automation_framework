@@ -7,6 +7,8 @@ import TestPlans from './views/TestPlans.vue'
 import TestPlanDetail from './views/TestPlanDetail.vue'
 import TestCatalog from './views/TestCatalog.vue'
 import Variables from './views/Variables.vue'
+import ExecutionLogs from './views/ExecutionLogs.vue'
+import ExecutionLogDetail from './views/ExecutionLogDetail.vue'
 
 // Create router
 const router = createRouter({
@@ -36,6 +38,16 @@ const router = createRouter({
       path: '/variables',
       name: 'Variables',
       component: Variables
+    },
+    {
+      path: '/execution-logs',
+      name: 'ExecutionLogs',
+      component: ExecutionLogs
+    },
+    {
+      path: '/execution-logs/:filename',
+      name: 'ExecutionLogDetail',
+      component: ExecutionLogDetail
     }
   ]
 })

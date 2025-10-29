@@ -166,6 +166,10 @@ def get_variables_path():
     """Get the path to variables configuration"""
     return os.path.join(os.path.dirname(__file__), '..', '..', 'configs', 'variables.json')
 
+def get_execution_logs_directory():
+    """Get the path to execution logs directory"""
+    return os.path.join(os.path.dirname(__file__), '..', '..', 'test_execution_log')
+
 def load_variables():
     """Load variables from file and handle both old and new formats"""
     variables_path = get_variables_path()
@@ -560,6 +564,113 @@ async def delete_test_function(function_index: int):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error deleting test function: {str(e)}")
+
+@app.get("/api/execution-log")
+async def get_execution_logs():
+    """Get all execution logs"""
+    execution_logs_dir = get_execution_logs_directory()
+    execution_logs = []
+    
+    try:
+        for filename in os.listdir(execution_logs_dir):
+            if filename.endswith('.json'):
+                file_path = os.path.join(execution_logs_dir, filename)
+                try:
+                    with open(file_path, 'r') as f:
+                        log_data = json.load(f)
+                    
+                    # Parse filename to extract metadata
+                    # Format: log_Test Plan Name_YYYY-MM-DD_HH_MM.json
+                    filename_parts = filename.replace('log_', '').replace('.json', '').split('_')
+                    test_plan_name = ' '.join(filename_parts[:-3])  # Everything except date/time parts
+                    date_part = filename_parts[-3]
+                    time_part = f"{filename_parts[-2]}:{filename_parts[-1]}"
+                    
+                    execution_logs.append({
+                        "filename": filename,
+                        "test_plan_name": test_plan_name,
+                        "execution_date": date_part,
+                        "execution_time": time_part,
+                        "timestamp": log_data.get("timestamp", ""),
+                        "execution_time_seconds": log_data.get("execution_time_seconds", 0),
+                        "results": log_data.get("results", {}),
+                        "current_user": log_data.get("current_user", ""),
+                        "execution_id": log_data.get("execution_id", "")
+                    })
+                except Exception as e:
+                    print(f"Error reading log file {filename}: {str(e)}")
+                    continue
+                    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error reading execution logs: {str(e)}")
+    
+    # Sort by timestamp descending (most recent first)
+    execution_logs.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
+    
+    return execution_logs
+
+@app.get("/api/execution-log/{filename}")
+async def get_execution_log(filename: str):
+    """Get specific execution log by filename"""
+    execution_log_path = os.path.join(get_execution_logs_directory(), filename)
+    
+    try:
+        with open(execution_log_path, 'r') as f:
+            log_data = json.load(f)
+            return log_data
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Execution log not found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error reading execution log: {str(e)}")
+
+@app.delete("/api/execution-log/{filename}")
+async def delete_execution_log(filename: str):
+    """Delete a specific execution log"""
+    execution_log_path = os.path.join(get_execution_logs_directory(), filename)
+    
+    try:
+        if not os.path.exists(execution_log_path):
+            raise HTTPException(status_code=404, detail="Execution log not found")
+        
+        os.remove(execution_log_path)
+        
+        return {
+            "message": "Execution log deleted successfully",
+            "filename": filename
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting execution log: {str(e)}")
+
+@app.post("/api/execution-log/bulk-delete")
+async def bulk_delete_execution_logs(filenames: List[str]):
+    """Delete multiple execution logs"""
+    execution_logs_dir = get_execution_logs_directory()
+    deleted_files = []
+    errors = []
+    
+    try:
+        for filename in filenames:
+            execution_log_path = os.path.join(execution_logs_dir, filename)
+            if os.path.exists(execution_log_path):
+                try:
+                    os.remove(execution_log_path)
+                    deleted_files.append(filename)
+                except Exception as e:
+                    errors.append(f"Error deleting {filename}: {str(e)}")
+            else:
+                errors.append(f"File not found: {filename}")
+        
+        return {
+            "message": f"Deleted {len(deleted_files)} execution logs",
+            "deleted_files": deleted_files,
+            "errors": errors
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error during bulk deletion: {str(e)}")
 
 @app.post("/api/test-execution")
 async def execute_test_plan(request: TestExecutionRequest):

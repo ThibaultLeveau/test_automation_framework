@@ -7,7 +7,7 @@
           <router-link to="/" class="nav-link">Home</router-link>
           <router-link to="/test-plans" class="nav-link">Test Plans</router-link>
           <router-link to="/test-catalog" class="nav-link">Test Catalog</router-link>
-          <router-link to="/execution" class="nav-link">Execution</router-link>
+          <router-link to="/execution-logs" class="nav-link">Execution Logs</router-link>
           <router-link to="/variables" class="nav-link">Variables</router-link>
         </nav>
       </div>

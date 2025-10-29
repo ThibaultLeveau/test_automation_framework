@@ -33,7 +33,7 @@
           <span class="stat-value">{{ executionLogsCount }}</span>
           <span class="stat-label">Recent Executions</span>
         </div>
-        <router-link to="/execution" class="card-action">View Logs</router-link>
+        <router-link to="/execution-logs" class="card-action">View Logs</router-link>
       </div>
 
       <div class="dashboard-card">
@@ -96,8 +96,9 @@ export default {
         const variablesResponse = await axios.get('/api/variables')
         variablesCount.value = Object.keys(variablesResponse.data).length
 
-        // For now, set execution logs to 0 (will be implemented later)
-        executionLogsCount.value = 0
+        // Fetch execution logs count
+        const logsResponse = await axios.get('/api/execution-log')
+        executionLogsCount.value = logsResponse.data.length
 
       } catch (error) {
         console.error('Error fetching dashboard data:', error)

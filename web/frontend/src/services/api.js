@@ -105,6 +105,28 @@ class ApiService {
       method: 'DELETE',
     });
   }
+
+  // Execution Log endpoints
+  async getExecutionLogs() {
+    return this.request('/execution-log');
+  }
+
+  async getExecutionLog(filename) {
+    return this.request(`/execution-log/${filename}`);
+  }
+
+  async deleteExecutionLog(filename) {
+    return this.request(`/execution-log/${filename}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async deleteExecutionLogs(filenames) {
+    return this.request('/execution-log/bulk-delete', {
+      method: 'POST',
+      body: JSON.stringify(filenames),
+    });
+  }
 }
 
 export default new ApiService();
