@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "last_updated": "2025-01-22",
+  "last_updated": "2025-10-29",
   "description": "Comprehensive catalog of all available test automation script functions for the test automation framework",
   "scripts": [
     {
@@ -14,10 +14,13 @@
       },
       "description": "Comprehensive file validation function that checks file existence, permissions, ownership, and group membership. Supports both Windows and Linux systems with platform-specific validation for ownership and group checks. Returns standardized result structure with success/failure indicators.",
       "category": "files",
-      "platform_support": ["windows", "linux"],
+      "platform_support": [
+        "windows",
+        "linux"
+      ],
       "return_structure": {
         "stdout": "str - Standard output message",
-        "stderr": "str - Error output message", 
+        "stderr": "str - Error output message",
         "exception": "str - Exception message if any",
         "returncode": "int - 0 for success, non-zero for failure"
       }
@@ -33,7 +36,10 @@
       },
       "description": "File creation utility that creates files at specified paths with optional content and permissions. Supports automatic parent directory creation and temporary directory usage with <tmp> tags. Useful for test setup and temporary file operations.",
       "category": "files",
-      "platform_support": ["windows", "linux"],
+      "platform_support": [
+        "windows",
+        "linux"
+      ],
       "return_structure": {
         "stdout": "str - Standard output message",
         "stderr": "str - Error output message",
@@ -52,7 +58,10 @@
       },
       "description": "Cross-platform command execution function that runs commands on Windows (PowerShell) or Linux (bash) systems. Supports working directory specification, timeout control, and output validation through search string matching. Automatically detects platform and uses appropriate shell.",
       "category": "process",
-      "platform_support": ["windows", "linux"],
+      "platform_support": [
+        "windows",
+        "linux"
+      ],
       "return_structure": {
         "stdout": "str - Standard output from the command",
         "stderr": "str - Error output from the command",
@@ -85,7 +94,10 @@
       },
       "description": "Comprehensive HTTP request function supporting multiple authentication types, custom headers, request body, proxy configuration, and SSL certificate verification. Supports both legacy authentication parameters and new standardized authentication parameters (auth_username, auth_password, auth_token) for secure credential management.",
       "category": "http",
-      "platform_support": ["windows", "linux"],
+      "platform_support": [
+        "windows",
+        "linux"
+      ],
       "return_structure": {
         "stdout": "str - Standard output with response details",
         "stderr": "str - Error output if any",
@@ -105,7 +117,10 @@
       },
       "description": "Clone a Git repository to the specified directory with support for authentication and Git configuration management. Supports clearing Git configuration environment variables for isolated testing.",
       "category": "git",
-      "platform_support": ["windows", "linux"],
+      "platform_support": [
+        "windows",
+        "linux"
+      ],
       "return_structure": {
         "stdout": "str - Standard output from the operation",
         "stderr": "str - Error output if any",
@@ -126,7 +141,10 @@
       },
       "description": "Add, commit, and push a file to a Git repository with support for authentication and Git configuration management. Validates repository and file existence before operations.",
       "category": "git",
-      "platform_support": ["windows", "linux"],
+      "platform_support": [
+        "windows",
+        "linux"
+      ],
       "return_structure": {
         "stdout": "str - Standard output from the operation",
         "stderr": "str - Error output if any",
@@ -145,7 +163,10 @@
       },
       "description": "Validate connectivity to a Git repository using ls-remote command. This is the Git equivalent of 'svn info' or 'svn ls' for connectivity testing. Provides lightweight validation of repository accessibility and authentication without cloning.",
       "category": "git",
-      "platform_support": ["windows", "linux"],
+      "platform_support": [
+        "windows",
+        "linux"
+      ],
       "return_structure": {
         "stdout": "str - Standard output from the operation",
         "stderr": "str - Error output if any",
@@ -166,7 +187,10 @@
       },
       "description": "Remove a file from a Git repository and push the deletion with support for authentication and Git configuration management. Validates repository existence before operations.",
       "category": "git",
-      "platform_support": ["windows", "linux"],
+      "platform_support": [
+        "windows",
+        "linux"
+      ],
       "return_structure": {
         "stdout": "str - Standard output from the operation",
         "stderr": "str - Error output if any",

@@ -5,6 +5,7 @@ import App from './App.vue'
 import Home from './views/Home.vue'
 import TestPlans from './views/TestPlans.vue'
 import TestPlanDetail from './views/TestPlanDetail.vue'
+import TestCatalog from './views/TestCatalog.vue'
 
 // Create router
 const router = createRouter({
@@ -24,6 +25,11 @@ const router = createRouter({
       path: '/test-plans/:id',
       name: 'TestPlanDetail',
       component: TestPlanDetail
+    },
+    {
+      path: '/test-catalog',
+      name: 'TestCatalog',
+      component: TestCatalog
     }
   ]
 })

@@ -56,11 +56,32 @@ class ApiService {
     });
   }
 
-  // Other endpoints
+  // Test Catalog endpoints
   async getTestCatalog() {
     return this.request('/test-catalog');
   }
 
+  async createTestFunction(testFunction) {
+    return this.request('/test-catalog', {
+      method: 'POST',
+      body: JSON.stringify(testFunction),
+    });
+  }
+
+  async updateTestFunction(functionIndex, testFunction) {
+    return this.request(`/test-catalog/${functionIndex}`, {
+      method: 'PUT',
+      body: JSON.stringify(testFunction),
+    });
+  }
+
+  async deleteTestFunction(functionIndex) {
+    return this.request(`/test-catalog/${functionIndex}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Other endpoints
   async getVariables() {
     return this.request('/variables');
   }

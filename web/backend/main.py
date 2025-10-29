@@ -51,6 +51,15 @@ class Variable(BaseModel):
     value: str
     description: Optional[str] = None
 
+class TestFunction(BaseModel):
+    script_path: str
+    function_name: str
+    function_args: Dict[str, str]
+    description: str
+    category: str
+    platform_support: List[str]
+    return_structure: Dict[str, str]
+
 # Utility functions
 def get_test_plans_directory():
     """Get the path to test plans directory"""
@@ -273,6 +282,131 @@ async def delete_test_plan(test_plan_id: str):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error deleting test plan: {str(e)}")
+
+@app.post("/api/test-catalog")
+async def create_test_function(test_function: TestFunction):
+    """Create a new test function in catalog"""
+    try:
+        catalog_path = get_script_catalog_path()
+        
+        # Read existing catalog
+        with open(catalog_path, 'r') as f:
+            catalog_data = json.load(f)
+        
+        # Check if function already exists
+        for script in catalog_data.get("scripts", []):
+            if (script["script_path"] == test_function.script_path and 
+                script["function_name"] == test_function.function_name):
+                raise HTTPException(status_code=400, detail="Test function already exists")
+        
+        # Add new function
+        new_function = {
+            "script_path": test_function.script_path,
+            "function_name": test_function.function_name,
+            "function_args": test_function.function_args,
+            "description": test_function.description,
+            "category": test_function.category,
+            "platform_support": test_function.platform_support,
+            "return_structure": test_function.return_structure
+        }
+        
+        catalog_data["scripts"].append(new_function)
+        
+        # Update last_updated
+        catalog_data["last_updated"] = datetime.now().strftime("%Y-%m-%d")
+        
+        # Write back to file
+        with open(catalog_path, 'w') as f:
+            json.dump(catalog_data, f, indent=2)
+        
+        return {
+            "message": "Test function created successfully",
+            "function_name": test_function.function_name
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error creating test function: {str(e)}")
+
+@app.put("/api/test-catalog/{function_index}")
+async def update_test_function(function_index: int, test_function: TestFunction):
+    """Update an existing test function in catalog"""
+    try:
+        catalog_path = get_script_catalog_path()
+        
+        # Read existing catalog
+        with open(catalog_path, 'r') as f:
+            catalog_data = json.load(f)
+        
+        # Check if function index is valid
+        if function_index < 0 or function_index >= len(catalog_data.get("scripts", [])):
+            raise HTTPException(status_code=404, detail="Test function not found")
+        
+        # Update function
+        catalog_data["scripts"][function_index] = {
+            "script_path": test_function.script_path,
+            "function_name": test_function.function_name,
+            "function_args": test_function.function_args,
+            "description": test_function.description,
+            "category": test_function.category,
+            "platform_support": test_function.platform_support,
+            "return_structure": test_function.return_structure
+        }
+        
+        # Update last_updated
+        catalog_data["last_updated"] = datetime.now().strftime("%Y-%m-%d")
+        
+        # Write back to file
+        with open(catalog_path, 'w') as f:
+            json.dump(catalog_data, f, indent=2)
+        
+        return {
+            "message": "Test function updated successfully",
+            "function_name": test_function.function_name
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error updating test function: {str(e)}")
+
+@app.delete("/api/test-catalog/{function_index}")
+async def delete_test_function(function_index: int):
+    """Delete a test function from catalog"""
+    try:
+        catalog_path = get_script_catalog_path()
+        
+        # Read existing catalog
+        with open(catalog_path, 'r') as f:
+            catalog_data = json.load(f)
+        
+        # Check if function index is valid
+        if function_index < 0 or function_index >= len(catalog_data.get("scripts", [])):
+            raise HTTPException(status_code=404, detail="Test function not found")
+        
+        # Get function name for response
+        function_name = catalog_data["scripts"][function_index]["function_name"]
+        
+        # Remove function
+        catalog_data["scripts"].pop(function_index)
+        
+        # Update last_updated
+        catalog_data["last_updated"] = datetime.now().strftime("%Y-%m-%d")
+        
+        # Write back to file
+        with open(catalog_path, 'w') as f:
+            json.dump(catalog_data, f, indent=2)
+        
+        return {
+            "message": "Test function deleted successfully",
+            "function_name": function_name
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting test function: {str(e)}")
 
 @app.post("/api/test-execution")
 async def execute_test_plan(request: TestExecutionRequest):
