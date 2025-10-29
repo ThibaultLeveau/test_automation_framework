@@ -50,6 +50,16 @@ class Variable(BaseModel):
     name: str
     value: str
     description: Optional[str] = None
+    
+    @validator('name')
+    def validate_name(cls, v):
+        if not v:
+            raise ValueError('Variable name cannot be empty')
+        if ' ' in v:
+            raise ValueError('Variable name cannot contain spaces')
+        if not re.match(r'^[a-zA-Z_][a-zA-Z0-9_]*$', v):
+            raise ValueError('Variable name must start with a letter or underscore and contain only alphanumeric characters and underscores')
+        return v
 
 class TestFunction(BaseModel):
     script_path: str
@@ -152,17 +162,160 @@ async def get_test_catalog():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error reading test catalog: {str(e)}")
 
-@app.get("/api/variables")
-async def get_variables():
-    """Get all variables from configuration"""
-    variables_path = os.path.join(os.path.dirname(__file__), '..', '..', 'configs', 'variables.json')
-    
+def get_variables_path():
+    """Get the path to variables configuration"""
+    return os.path.join(os.path.dirname(__file__), '..', '..', 'configs', 'variables.json')
+
+def load_variables():
+    """Load variables from file and handle both old and new formats"""
+    variables_path = get_variables_path()
     try:
         with open(variables_path, 'r') as f:
             variables_data = json.load(f)
-            return variables_data
+        
+        # Handle new enhanced format
+        if isinstance(variables_data, dict) and "variables" in variables_data:
+            return variables_data["variables"]
+        
+        # Handle old key-value format (backward compatibility)
+        variables_list = []
+        for name, value in variables_data.items():
+            variables_list.append({
+                "name": name,
+                "value": value,
+                "description": ""
+            })
+        return variables_list
+    except FileNotFoundError:
+        return []
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error reading variables: {str(e)}")
+
+def save_variables(variables_list):
+    """Save variables to file in enhanced format with descriptions"""
+    variables_path = get_variables_path()
+    try:
+        # Save in enhanced format that includes descriptions
+        enhanced_variables = {
+            "variables": variables_list,
+            "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+        
+        with open(variables_path, 'w') as f:
+            json.dump(enhanced_variables, f, indent=2)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error saving variables: {str(e)}")
+
+@app.get("/api/variables")
+async def get_variables():
+    """Get all variables from configuration"""
+    return load_variables()
+
+@app.post("/api/variables")
+async def create_variable(variable: Variable):
+    """Create a new variable"""
+    try:
+        variables = load_variables()
+        
+        # Check if variable already exists
+        for existing_var in variables:
+            if existing_var["name"] == variable.name:
+                raise HTTPException(status_code=400, detail="Variable with this name already exists")
+        
+        # Add new variable
+        new_variable = {
+            "name": variable.name,
+            "value": variable.value,
+            "description": variable.description or ""
+        }
+        variables.append(new_variable)
+        
+        # Save updated variables
+        save_variables(variables)
+        
+        return {
+            "message": "Variable created successfully",
+            "variable": new_variable
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error creating variable: {str(e)}")
+
+@app.put("/api/variables/{variable_name}")
+async def update_variable(variable_name: str, variable: Variable):
+    """Update an existing variable"""
+    try:
+        variables = load_variables()
+        
+        # Find the variable to update
+        variable_index = -1
+        for i, existing_var in enumerate(variables):
+            if existing_var["name"] == variable_name:
+                variable_index = i
+                break
+        
+        if variable_index == -1:
+            raise HTTPException(status_code=404, detail="Variable not found")
+        
+        # If name is being changed, check for conflicts
+        if variable.name != variable_name:
+            for existing_var in variables:
+                if existing_var["name"] == variable.name and existing_var["name"] != variable_name:
+                    raise HTTPException(status_code=400, detail="Variable with this name already exists")
+        
+        # Update variable
+        variables[variable_index] = {
+            "name": variable.name,
+            "value": variable.value,
+            "description": variable.description or ""
+        }
+        
+        # Save updated variables
+        save_variables(variables)
+        
+        return {
+            "message": "Variable updated successfully",
+            "variable": variables[variable_index]
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error updating variable: {str(e)}")
+
+@app.delete("/api/variables/{variable_name}")
+async def delete_variable(variable_name: str):
+    """Delete a variable"""
+    try:
+        variables = load_variables()
+        
+        # Find the variable to delete
+        variable_index = -1
+        for i, existing_var in enumerate(variables):
+            if existing_var["name"] == variable_name:
+                variable_index = i
+                break
+        
+        if variable_index == -1:
+            raise HTTPException(status_code=404, detail="Variable not found")
+        
+        # Remove variable
+        deleted_variable = variables.pop(variable_index)
+        
+        # Save updated variables
+        save_variables(variables)
+        
+        return {
+            "message": "Variable deleted successfully",
+            "variable": deleted_variable
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting variable: {str(e)}")
 
 @app.post("/api/test-plans")
 async def create_test_plan(test_plan: TestPlan):

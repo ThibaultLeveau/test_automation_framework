@@ -81,9 +81,29 @@ class ApiService {
     });
   }
 
-  // Other endpoints
+  // Variables endpoints
   async getVariables() {
     return this.request('/variables');
+  }
+
+  async createVariable(variable) {
+    return this.request('/variables', {
+      method: 'POST',
+      body: JSON.stringify(variable),
+    });
+  }
+
+  async updateVariable(variableName, variable) {
+    return this.request(`/variables/${variableName}`, {
+      method: 'PUT',
+      body: JSON.stringify(variable),
+    });
+  }
+
+  async deleteVariable(variableName) {
+    return this.request(`/variables/${variableName}`, {
+      method: 'DELETE',
+    });
   }
 }
 

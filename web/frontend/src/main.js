@@ -6,6 +6,7 @@ import Home from './views/Home.vue'
 import TestPlans from './views/TestPlans.vue'
 import TestPlanDetail from './views/TestPlanDetail.vue'
 import TestCatalog from './views/TestCatalog.vue'
+import Variables from './views/Variables.vue'
 
 // Create router
 const router = createRouter({
@@ -30,6 +31,11 @@ const router = createRouter({
       path: '/test-catalog',
       name: 'TestCatalog',
       component: TestCatalog
+    },
+    {
+      path: '/variables',
+      name: 'Variables',
+      component: Variables
     }
   ]
 })
